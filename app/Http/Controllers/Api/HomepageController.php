@@ -81,6 +81,29 @@ class HomepageController extends Controller
     ];
 
     /**
+     * Columns the storefront homepage cards actually render. Kept deliberately
+     * small — the homepage never shows product descriptions, SEO metadata,
+     * cost, SKUs, barcodes, etc., so shipping them only bloats the payload.
+     * (Variants are loaded for reels only, where the inline picker needs them.)
+     */
+    private const HOMEPAGE_PRODUCT_COLUMNS = [
+        'id', 'name', 'slug', 'price', 'old_price', 'badge', 'quantity',
+        'rating', 'review_count', 'description', 'short_description',
+        'is_new', 'is_sale', 'is_featured', 'category_id', 'created_at', 'updated_at',
+    ];
+
+    /**
+     * Eager-loads the relations the homepage product card + quick view need:
+     * category name for the chip, image URLs for the gallery. No variants —
+     * the homepage card adds to bag directly (variants are for the reels
+     * picker and product detail page, which have their own queries).
+     */
+    private const HOMEPAGE_PRODUCT_WITH = [
+        'category:id,name,slug,image',
+        'images:id,product_id,url,alt,display_order',
+    ];
+
+    /**
      * Add camelCase keys to a single product array (preserving original snake_case keys).
      */
     private function productToCamelCase(array $product): array
@@ -216,11 +239,8 @@ class HomepageController extends Controller
             // the homepage response much smaller.
             $featured = [];
             try {
-                $featured = $this->decodeVariants(Product::with([
-                    'category:id,name,slug,image',
-                    'images:id,product_id,url,alt,display_order',
-                    'variants:id,product_id,name,sku,attributes,price,quantity',
-                ])
+                $featured = $this->decodeVariants(Product::with(self::HOMEPAGE_PRODUCT_WITH)
+                    ->select(self::HOMEPAGE_PRODUCT_COLUMNS)
                     ->where('status', 'PUBLISHED')
                     ->where('is_featured', true)
                     ->where('id', '!=', ProductRepository::CUSTOM_TEE_PRODUCT_ID)
@@ -235,11 +255,8 @@ class HomepageController extends Controller
             // ── 4. New Arrivals ──
             $newArrivals = [];
             try {
-                $newArrivals = $this->decodeVariants(Product::with([
-                    'category:id,name,slug,image',
-                    'images:id,product_id,url,alt,display_order',
-                    'variants:id,product_id,name,sku,attributes,price,quantity',
-                ])
+                $newArrivals = $this->decodeVariants(Product::with(self::HOMEPAGE_PRODUCT_WITH)
+                    ->select(self::HOMEPAGE_PRODUCT_COLUMNS)
                     ->where('status', 'PUBLISHED')
                     ->where('id', '!=', ProductRepository::CUSTOM_TEE_PRODUCT_ID)
                     ->latest()
@@ -255,11 +272,8 @@ class HomepageController extends Controller
             try {
                 $bestSellersEnabled = $settings['bestSellersEnabled'] ?? 'true';
                 if ($bestSellersEnabled !== 'false' && $bestSellersEnabled !== '0') {
-                    $bestSellers = $this->decodeVariants(Product::with([
-                        'category:id,name,slug,image',
-                        'images:id,product_id,url,alt,display_order',
-                        'variants:id,product_id,name,sku,attributes,price,quantity',
-                    ])
+                    $bestSellers = $this->decodeVariants(Product::with(self::HOMEPAGE_PRODUCT_WITH)
+                        ->select(self::HOMEPAGE_PRODUCT_COLUMNS)
                         ->where('status', 'PUBLISHED')
                         ->where('id', '!=', ProductRepository::CUSTOM_TEE_PRODUCT_ID)
                         ->orderBy('view_count', 'desc')
@@ -341,7 +355,8 @@ class HomepageController extends Controller
                             $q->select('product_images.id', 'product_images.product_id', 'product_images.url', 'product_images.alt')
                               ->orderBy('product_images.display_order');
                         }, 'products.variants' => function ($q) {
-                            $q->select('id', 'product_id', 'name', 'sku', 'attributes', 'price', 'quantity', 'images');
+                            // Pickers need attributes/price/stock/images — not name/sku bloat
+                            $q->select('id', 'product_id', 'attributes', 'price', 'quantity', 'images');
                         }])
                         ->orderBy('display_order')
                         ->orderBy('created_at', 'desc')
@@ -368,8 +383,6 @@ class HomepageController extends Controller
                                 'variants' => $p->variants->map(fn ($v) => [
                                     'id' => $v->id,
                                     'product_id' => $v->product_id,
-                                    'name' => $v->name,
-                                    'sku' => $v->sku,
                                     'attributes' => is_string($v->attributes) ? json_decode($v->attributes, true) : $v->attributes,
                                     'price' => $v->price,
                                     'quantity' => $v->quantity,

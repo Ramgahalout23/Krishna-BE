@@ -1,0 +1,390 @@
+/* Shipping Label Print Styles
+   These are loaded by the handlePrint function when opening a print window.
+   Maintained separately from the component logic for easier editing.
+*/
+
+@page { size: 4in 6in; margin: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 12px;
+  background: #fff;
+  color: #1a1a1a;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ── LABEL CONTAINER ── */
+
+.label-page {
+  background: #fff;
+  border: 1.5px solid #1a1a1a;
+  padding: 16px 14px;
+  width: 360px;
+  height: 540px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  color: #1a1a1a;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+/* ── HEADER ── */
+
+.label-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1.5px solid #1a1a1a;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.label-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label-logo {
+  max-height: 32px;
+  max-width: 140px;
+  object-fit: contain;
+  display: block;
+}
+
+.label-brand-name {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #000;
+  line-height: 1;
+}
+
+.label-brand-sub {
+  font-size: 6.5px;
+  color: #999;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.label-type-badge {
+  border: 1.5px solid #1a1a1a;
+  padding: 3px 10px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+/* ── ADDRESSES: FROM | TO ── */
+
+.address-section {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0;
+  border-bottom: 1.5px solid #1a1a1a;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  min-height: 88px;
+}
+
+.address-divider {
+  background: #ddd;
+  height: 100%;
+  width: 1px;
+  align-self: stretch;
+}
+
+.address-box {
+  padding: 4px 8px;
+}
+
+.address-box:first-child { padding-left: 0; }
+.address-box:last-child { padding-right: 0; }
+
+.address-label {
+  font-size: 6.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.address-name {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  color: #1a1a1a;
+}
+
+.address-name--from {
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #1a1a1a;
+}
+
+.address-detail {
+  font-size: 9px;
+  line-height: 1.4;
+  color: #555;
+  white-space: pre-wrap;
+}
+
+.address-detail--from {
+  font-size: 8.5px;
+  line-height: 1.4;
+  color: #666;
+  white-space: normal;
+}
+
+/* ── BILLING ADDRESS ── */
+
+.billing-section {
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+.billing-label {
+  font-size: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+
+.billing-name {
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 1px;
+  color: #1a1a1a;
+}
+
+.billing-detail {
+  font-size: 8.5px;
+  line-height: 1.35;
+  color: #666;
+  white-space: pre-wrap;
+}
+
+/* ── ORDER INFO BAR ── */
+
+.info-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1.5px solid #1a1a1a;
+  padding: 6px 0;
+  margin-bottom: 6px;
+  font-size: 8px;
+}
+
+.info-item {
+  padding: 0 6px;
+  border-right: 1px solid #eee;
+}
+
+.info-item:last-child { border-right: none; }
+
+.info-label {
+  font-size: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.8px;
+  margin-bottom: 1px;
+}
+
+.info-value {
+  font-weight: 700;
+  font-size: 9px;
+  color: #1a1a1a;
+}
+
+/* ── PAYMENT COLLECTION BADGE ── */
+
+.payment-collection-badge {
+  padding: 5px 0;
+  margin-bottom: 6px;
+  border-bottom: 1px dashed #ddd;
+  display: flex;
+  justify-content: center;
+}
+
+.cod-collect-badge {
+  background: #f8f8f8;
+  border: 1.5px solid #1a1a1a;
+  color: #1a1a1a;
+  font-size: 8.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  width: 100%;
+  justify-content: center;
+}
+
+.cod-collect-badge strong {
+  font-size: 12px;
+  color: #000;
+  font-weight: 800;
+}
+
+.cod-icon {
+  font-size: 13px;
+}
+
+.prepaid-badge {
+  background: #1a1a1a;
+  border: 1.5px solid #000;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.info-value.payment-badge {
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+}
+
+.payment-cod {
+  background: #f5f5f5;
+  color: #1a1a1a;
+  border: 1px solid #ccc;
+}
+
+.payment-prepaid {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #1a1a1a;
+}
+
+/* ── ITEMS SUMMARY ── */
+
+.items-section {
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  font-size: 7.5px;
+  color: #666;
+}
+
+.items-section-title {
+  font-size: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.8px;
+  margin-bottom: 3px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5px 0;
+}
+
+.item-price {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.items-more {
+  color: #aaa;
+  font-style: italic;
+  font-size: 7px;
+}
+
+/* ── BARCODE ── */
+
+.barcode-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 0;
+  border-bottom: 1.5px solid #1a1a1a;
+  margin-bottom: 6px;
+}
+
+.tracking-label {
+  font-size: 6.5px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* ── FOOTER: Return + Customer Care ── */
+
+.footer-section {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  padding: 5px 0;
+  font-size: 7.5px;
+  line-height: 1.4;
+  margin-top: auto;
+}
+
+.footer-divider {
+  background: #e0e0e0;
+  height: 100%;
+  width: 1px;
+  align-self: stretch;
+}
+
+.footer-box {
+  padding: 0 8px;
+}
+
+.footer-box:first-child { padding-left: 0; }
+.footer-box:last-child { padding-right: 0; }
+
+.footer-title {
+  font-size: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+
+.footer-text {
+  color: #555;
+  line-height: 1.4;
+}
+
+/* ── FOOTER NOTE ── */
+
+.label-note {
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  text-align: center;
+  font-size: 6.5px;
+  color: #888;
+  line-height: 1.3;
+}

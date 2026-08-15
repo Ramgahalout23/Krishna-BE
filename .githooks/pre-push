@@ -1,0 +1,90 @@
+#!/bin/sh
+#
+# Pre-push hook — blocks pushes that would deploy QUEUE_CONNECTION=sync
+# to protected production branches.
+#
+# Protected branches: main, master, production
+# We check ALL commits being pushed for QUEUE_CONNECTION=sync in .env* files.
+#
+# To bypass (use with extreme caution):
+#   git push --no-verify origin main
+#   (or)  git push -o no-verify origin main
+
+set -e
+
+# ── Config ──────────────────────────────────────────────────────
+PROTECTED_BRANCHES="main master production"
+# ─────────────────────────────────────────────────────────────────
+
+# Read the push refs from stdin (standard pre-push input format)
+# Format: <local-ref> <local-sha1> <remote-ref> <remote-sha1>
+while read local_ref local_sha remote_ref remote_sha; do
+    # Get the short branch name from the remote ref (e.g., refs/heads/main → main)
+    remote_branch="${remote_ref#refs/heads/}"
+
+    # Skip if not a branch ref (e.g., tag refs)
+    [ "$remote_branch" = "$remote_ref" ] && continue
+
+    # Check if this remote branch is protected
+    is_protected=0
+    for protected in $PROTECTED_BRANCHES; do
+        if [ "$remote_branch" = "$protected" ]; then
+            is_protected=1
+            break
+        fi
+    done
+
+    [ "$is_protected" = "0" ] && continue
+
+    # ── We have a push to a protected branch — inspect the commits ──
+
+    # Determine the commits to check
+    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+        # New branch — check all commits not reachable from any remote
+        commit_list=$(git rev-list --not --remotes "${local_sha}" 2>/dev/null)
+    else
+        # Existing branch — check only new commits
+        commit_list=$(git rev-list "${remote_sha}..${local_sha}" 2>/dev/null)
+    fi
+
+    if [ -z "$commit_list" ]; then
+        continue
+    fi
+
+    # Scan the patch content of all new commits for QUEUE_CONNECTION=sync
+    sync_found=$(echo "$commit_list" | xargs -I{} git show --format="" -p {} 2>/dev/null | grep -E '^\+QUEUE_CONNECTION=sync$' || true)
+
+    if [ -n "$sync_found" ]; then
+        echo ""
+        echo "❌  BLOCKED: Push to '${remote_branch}' rejected!"
+        echo ""
+        echo "    QUEUE_CONNECTION=sync detected in this push."
+        echo "    The 'sync' driver runs jobs synchronously in the same request —"
+        echo "    it is intended for local development ONLY."
+        echo ""
+        echo "    For production, use one of these instead:"
+        echo "      QUEUE_CONNECTION=database"
+        echo "      QUEUE_CONNECTION=redis"
+        echo ""
+        echo "    To override (not recommended):"
+        echo "      git push --no-verify origin ${remote_branch}"
+        echo ""
+        exit 1
+    fi
+
+    # Also check if .env itself (tracked or staged) contains sync
+    if [ -f ".env" ] && grep -q '^QUEUE_CONNECTION=sync$' ".env"; then
+        echo ""
+        echo "❌  BLOCKED: Push to '${remote_branch}' rejected!"
+        echo ""
+        echo "    Your local .env file has QUEUE_CONNECTION=sync."
+        echo "    This would overwrite the production .env on deploy."
+        echo ""
+        echo "    Fix: Set QUEUE_CONNECTION=database or redis in .env"
+        echo "    before pushing to production."
+        echo ""
+        exit 1
+    fi
+done
+
+exit 0

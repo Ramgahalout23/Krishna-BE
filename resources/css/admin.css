@@ -1,0 +1,9 @@
+/* Admin Panel — custom styles on top of Tailwind & Font Awesome */
+
+/* Font Awesome — imported directly as CSS (not via JS) for faster rendering */
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
+/* Sidebar link base */
+.sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200;
+}

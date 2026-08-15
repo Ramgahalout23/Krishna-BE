@@ -1,0 +1,59 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header (important for Sanctum API auth)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # ── API Routes → Laravel's index.php ──
+    # All /api/* requests go to Laravel backend
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    # ── Storage / Uploads → Laravel index.php ──
+    RewriteCond %{REQUEST_URI} ^/(storage|uploads)/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    # ── React SPA Routes → index.html (for client-side routing) ──
+    # All non-API, non-file, non-folder requests serve React's index.html
+    # React app manages its own routing (including admin pages)
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/(storage|uploads)/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.html [L]
+
+    # ── Fallback: Laravel web routes (Blade admin, sitemap, etc.) ──
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# ── Security Headers ──
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# ── Cache Static Assets ──
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType application/json "access plus 1 month"
+</IfModule>

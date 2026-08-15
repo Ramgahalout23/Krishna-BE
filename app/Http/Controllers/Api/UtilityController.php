@@ -42,7 +42,7 @@ class UtilityController extends Controller
     public function uploadFile(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'file' => 'required|file|mimes:jpeg,png,jpg,gif,webp,svg,pdf,doc,docx,xls,xlsx,csv,txt,zip|max:10240',
+            'file' => 'required|file|mimes:jpeg,png,jpg,gif,webp,svg,pdf,doc,docx,xls,xlsx,csv,txt,zip,mp4,webm,ogv,mov,m4v,3gp|max:40960',
         ]);
         $file = $validated['file'];
         $result = app(\App\Services\StorageDriverService::class)->storeFile($file, 'uploads');
@@ -62,7 +62,7 @@ class UtilityController extends Controller
     {
         $validated = $request->validate([
             'files' => 'required|array',
-            'files.*' => 'required|file|mimes:jpeg,png,jpg,gif,webp,svg,pdf,doc,docx,xls,xlsx,csv,txt,zip|max:10240',
+            'files.*' => 'required|file|mimes:jpeg,png,jpg,gif,webp,svg,pdf,doc,docx,xls,xlsx,csv,txt,zip,mp4,webm,ogv,mov,m4v,3gp|max:40960',
         ]);
         $results = app(\App\Services\StorageDriverService::class)->storeFiles($validated['files'], 'uploads');
         $uploaded = [];

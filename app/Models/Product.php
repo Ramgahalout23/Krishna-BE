@@ -26,8 +26,15 @@ class Product extends Model
         'badge', 'quantity', 'sku', 'barcode', 'weight', 'category_id', 'brand_id',
         'status', 'is_featured', 'is_new', 'is_sale', 'is_digital', 'seo_title',
         'seo_description', 'seo_keywords', 'tags', 'view_count', 'rating', 'review_count', 'sold_count',
-        'hover_image_url'
+        'hover_image_url', 'video_url'
     ];
+
+    protected $appends = ['videoUrl'];
+
+    public function getVideoUrlAttribute(): ?string
+    {
+        return $this->attributes['video_url'] ?? null;
+    }
 
     protected $casts = [
         'is_featured' => 'boolean', 'is_new' => 'boolean', 'is_sale' => 'boolean',

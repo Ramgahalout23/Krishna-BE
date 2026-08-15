@@ -275,7 +275,18 @@ class HomepageController extends Controller
             $categories = [];
             try {
                 $categories = Category::select('id', 'name', 'slug', 'image', 'parent_id')
+                    ->withCount('products')
+                    // Show populated categories first so the grid never leads with "0 items"
+                    ->orderByDesc('products_count')
                     ->get()
+                    ->map(function ($category) {
+                        $arr = $category->toArray();
+                        // Frontend shows "N items" per category tile — ship a clean camelCase count
+                        $arr['itemCount'] = $category->products_count ?? 0;
+                        unset($arr['products_count']);
+                        return $arr;
+                    })
+                    ->values()
                     ->toArray();
             } catch (\Exception $e) {
                 logger()->warning('Homepage: categories fetch failed', ['error' => $e->getMessage()]);

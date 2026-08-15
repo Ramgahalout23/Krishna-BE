@@ -101,6 +101,7 @@ class ProductController extends Controller
             $input = $this->mapCamelCase($request->all(), [
                 'categoryId' => 'category_id',
                 'hoverImageUrl' => 'hover_image_url',
+                'videoUrl' => 'video_url',
             ]);
             $request->replace($input);
 
@@ -112,6 +113,7 @@ class ProductController extends Controller
                 'category_id' => 'nullable|exists:categories,id',
                 'quantity' => 'nullable|integer|min:0',
                 'status' => 'nullable|string|in:DRAFT,PUBLISHED,ARCHIVED',
+                'video_url' => 'nullable|string|max:2048',
             ]);
 
             $product = $this->productService->create($validated);
@@ -128,6 +130,7 @@ class ProductController extends Controller
             $input = $this->mapCamelCase($request->all(), [
                 'categoryId' => 'category_id',
                 'hoverImageUrl' => 'hover_image_url',
+                'videoUrl' => 'video_url',
             ]);
             $request->replace($input);
 
@@ -137,6 +140,7 @@ class ProductController extends Controller
                 'price' => 'sometimes|numeric|min:0',
                 'sku' => 'nullable|string|unique:products,sku,'.$id,
                 'status' => 'nullable|string|in:DRAFT,PUBLISHED,ARCHIVED',
+                'video_url' => 'nullable|string|max:2048',
             ]);
 
             $product = $this->productService->update($id, $validated);

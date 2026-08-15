@@ -9,8 +9,6 @@ use App\Models\Setting;
 use App\Services\CurrencyService;
 use App\Services\TranslationService;
 use App\Services\SettingsService;
-use App\Services\PageService;
-use App\Services\PromotionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
@@ -20,8 +18,6 @@ class AppInitController extends Controller
         protected CurrencyService $currencyService,
         protected TranslationService $translationService,
         protected SettingsService $settingsService,
-        protected PageService $pageService,
-        protected PromotionService $promotionService,
     ) {}
 
     /**
@@ -65,32 +61,42 @@ class AppInitController extends Controller
                 $languages = ['en'];
             }
 
-            // ── 4. Navigation pages (from PageService) ──
+            // ── 4. Navigation pages (for navbar links) ──
+            // The navbar only renders each page's title + slug as a link, so only
+            // those columns are shipped. Full page records (including HTML content)
+            // are heavy and never read from app-init.
             $pages = [];
             try {
-                $pages = $this->pageService->getAll();
+                $pages = Page::where('is_published', true)
+                    ->orderBy('title')
+                    ->select('id', 'title', 'slug')
+                    ->get()
+                    ->toArray();
             } catch (\Exception $e) {
                 logger()->warning('AppInit: pages fetch failed', ['error' => $e->getMessage()]);
             }
 
-            // ── 5. Active promotions (for nav badge) ──
-            $promotions = [];
+            // ── 5. Active promotions flag (for the nav "Offers"/LIVE badge) ──
+            // The frontend only checks whether any active promotion exists —
+            // shipping full promotion objects (image URLs + related products/
+            // categories) was wasted bandwidth.
+            $hasActivePromotions = false;
             try {
-                $promotions = $this->promotionService->getActive();
+                $salesEnabled = $this->settingsService->get('salesEnabled', 'true');
+                if ($salesEnabled !== 'false' && $salesEnabled !== '0') {
+                    $hasActivePromotions = Promotion::where('is_active', true)
+                        ->where(function ($q) {
+                            $q->whereNull('end_date')->orWhere('end_date', '>=', now());
+                        })
+                        ->exists();
+                }
             } catch (\Exception $e) {
                 logger()->warning('AppInit: promotions fetch failed', ['error' => $e->getMessage()]);
             }
 
-            // ── 6. Tracking session config ──
-            $tracking = [];
-            try {
-                $tracking = [
-                    'enabled' => $this->settingsService->get('tracking_enabled', 'true') !== 'false',
-                    'anonymize_ip' => $this->settingsService->get('tracking_anonymize_ip', 'true') !== 'false',
-                ];
-            } catch (\Exception $e) {
-                $tracking = ['enabled' => true, 'anonymize_ip' => true];
-            }
+            // ── 6. Tracking config — REMOVED. The frontend tracker
+            // (src/services/tracker.js) manages enable/disable entirely via
+            // localStorage; nothing reads this field from app-init.
 
             // ── 7. ALL settings (replaces the separate GET /settings API call) ──
             $settings = [];
@@ -100,7 +106,7 @@ class AppInitController extends Controller
                 logger()->warning('AppInit: settings fetch failed', ['error' => $e->getMessage()]);
             }
 
-            return compact('maintenance', 'currencies', 'languages', 'pages', 'promotions', 'tracking', 'settings');
+            return compact('maintenance', 'currencies', 'languages', 'pages', 'hasActivePromotions', 'settings');
         });
 
         return response()->json([

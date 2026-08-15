@@ -30,8 +30,8 @@ class UtilityController extends Controller
         $validated = $request->validate(['to' => 'required|email']);
         $sent = $this->emailService->sendEmail(
             $validated['to'],
-            'Test Email from THREVOLT',
-            '<h1>Test Email</h1><p>This is a test email from THREVOLT admin panel.</p>'
+            'Test Email from Krishna Store',
+            '<h1>Test Email</h1><p>This is a test email from the Krishna Store admin panel.</p>'
         );
         if ($sent) {
             return response()->json(['success' => true, 'message' => 'Test email sent to ' . $validated['to']]);

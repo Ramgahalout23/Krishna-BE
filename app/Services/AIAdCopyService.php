@@ -164,7 +164,7 @@ Respond with ONLY valid JSON:
     public function generateBannerDesign(array $options): array
     {
         $platform = $options['platform'] ?? 'INSTAGRAM';
-        $brandName = $options['brand_name'] ?? 'THREVOLT';
+        $brandName = $options['brand_name'] ?? 'Krishna Store';
         $productName = $options['product_name'] ?? 'Unknown';
         $headline = $options['headline'] ?? '';
 

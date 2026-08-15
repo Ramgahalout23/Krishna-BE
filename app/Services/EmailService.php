@@ -330,9 +330,9 @@ class EmailService
     {
         try {
             return $this->cacheWithTracking('store_name', 300, function () {
-                return Setting::where('module', 'SITE')->where('key', 'storeName')->value('value') ?? 'THREVOLT';
+                return Setting::where('module', 'SITE')->where('key', 'storeName')->value('value') ?? 'Krishna Store';
             });
-        } catch (\Exception $e) { return 'THREVOLT'; }
+        } catch (\Exception $e) { return 'Krishna Store'; }
     }
 
     private function buildEmailWrapper(string $title, string $bodyHtml, string $storeName = ''): string

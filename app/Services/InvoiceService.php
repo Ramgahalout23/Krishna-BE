@@ -28,12 +28,12 @@ class InvoiceService
         $storeEmail = '';
         $brandTagline = '';
         try {
-            $storeName = Setting::where('module', 'SITE')->where('key', 'storeName')->value('value') ?? 'THREVOLT';
-            $storeEmail = Setting::where('module', 'SITE')->where('key', 'storeEmail')->value('value') ?? 'support@threvolt.com';
+            $storeName = Setting::where('module', 'SITE')->where('key', 'storeName')->value('value') ?? 'Krishna Store';
+            $storeEmail = Setting::where('module', 'SITE')->where('key', 'storeEmail')->value('value') ?? 'support@krishnastore.in';
             $brandTagline = Setting::where('module', 'SITE')->where('key', 'brandTagline')->value('value') ?? 'Premium Fashion & Lifestyle';
         } catch (\Exception $e) {
-            $storeName = 'THREVOLT';
-            $storeEmail = 'support@threvolt.com';
+            $storeName = 'Krishna Store';
+            $storeEmail = 'support@krishnastore.in';
             $brandTagline = 'Premium Fashion & Lifestyle';
         }
 

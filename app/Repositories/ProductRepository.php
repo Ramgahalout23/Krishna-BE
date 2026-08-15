@@ -49,6 +49,24 @@ class ProductRepository extends BaseRepository
 
     public function findMany(array $filters = []): LengthAwarePaginator
     {
+        // Normalize camelCase filter keys (frontend API convention) to the
+        // snake_case keys this repository reads.
+        $camelToSnake = [
+            'sortBy' => 'sort_by',
+            'sortOrder' => 'sort_order',
+            'minPrice' => 'min_price',
+            'maxPrice' => 'max_price',
+            'categoryId' => 'category_id',
+            'brandId' => 'brand_id',
+            'perPage' => 'per_page',
+            'isFeatured' => 'is_featured',
+        ];
+        foreach ($camelToSnake as $camel => $snake) {
+            if (array_key_exists($camel, $filters) && !array_key_exists($snake, $filters)) {
+                $filters[$snake] = $filters[$camel];
+            }
+        }
+
         // Variant 'images' is omitted from list contexts — it's only needed on
         // the product detail page (findWithDetails/findBySlug). Lists only need
         // variant attributes (to compute sizes/colors), price and quantity.

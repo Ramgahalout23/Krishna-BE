@@ -335,7 +335,7 @@ class SeoService
             ->first();
         if ($existing) return;
 
-        $siteName = 'Threvolt';
+        $siteName = 'Krishna Store';
         $metaTitle = substr($name, 0, 50) . " | {$siteName}";
 
         $cleanDesc = strip_tags($description);

@@ -57,7 +57,7 @@ class AuthService
             $this->emailService->sendWelcomeEmail(
                 $user->email,
                 $user->first_name . ' ' . $user->last_name,
-                'THREVOLT'
+                'Krishna Store'
             );
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send welcome email', ['error' => $e->getMessage()]);

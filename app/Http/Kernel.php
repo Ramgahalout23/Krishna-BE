@@ -28,6 +28,8 @@ class Kernel extends HttpKernel
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\PerformanceLogger::class,
+            // Innermost middleware — gzips the final JSON response before it leaves.
+            \App\Http\Middleware\GzipMiddleware::class,
         ],
     ];
 

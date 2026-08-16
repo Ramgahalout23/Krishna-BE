@@ -84,7 +84,8 @@ class HomepageController extends Controller
      * Columns the storefront homepage cards actually render. Kept deliberately
      * small — the homepage never shows product descriptions, SEO metadata,
      * cost, SKUs, barcodes, etc., so shipping them only bloats the payload.
-     * (Variants are loaded for reels only, where the inline picker needs them.)
+     * (Variant attribute/price/quantity data IS included so the card's
+     * quick-add panel can compute in-stock colors/sizes and matched variants.)
      */
     private const HOMEPAGE_PRODUCT_COLUMNS = [
         'id', 'name', 'slug', 'price', 'old_price', 'badge', 'quantity',
@@ -94,13 +95,14 @@ class HomepageController extends Controller
 
     /**
      * Eager-loads the relations the homepage product card + quick view need:
-     * category name for the chip, image URLs for the gallery. No variants —
-     * the homepage card adds to bag directly (variants are for the reels
-     * picker and product detail page, which have their own queries).
+     * category name for the chip, image URLs for the gallery, and variant
+     * attributes (size/color) + price/quantity so the quick-add panel can
+     * compute in-stock colors/sizes and the matched variant price.
      */
     private const HOMEPAGE_PRODUCT_WITH = [
         'category:id,name,slug,image',
         'images:id,product_id,url,alt,display_order',
+        'variants:id,product_id,attributes,price,quantity',
     ];
 
     /**

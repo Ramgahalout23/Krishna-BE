@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Jobs\RecordEventJob;
+use App\Jobs\RecordEventsBatchJob;
 use App\Jobs\RecordPageViewJob;
 use App\Jobs\RecordSessionJob;
 use App\Repositories\TrackingRepository;
@@ -82,6 +83,45 @@ class TrackingService
         );
 
         return ['recorded' => true];
+    }
+
+    /**
+     * Record many events in one request + one bulk INSERT (dispatchAfterResponse,
+     * like recordEvent — tracking never blocks the user).
+     * Returns the number of events accepted.
+     */
+    public function recordEventsBatch(array $events): int
+    {
+        // Normalize both camelCase and snake_case field names from the frontend.
+        $normalized = [];
+        foreach ($events as $event) {
+            if (!is_array($event)) {
+                continue;
+            }
+            $sessionId = $event['session_id'] ?? $event['sessionId'] ?? null;
+            if (!$sessionId) {
+                continue; // events without a session are dropped, matching single-event behavior
+            }
+            $normalized[] = [
+                'session_id' => $sessionId,
+                'user_id' => $event['user_id'] ?? $event['userId'] ?? null,
+                'event_type' => $event['event_type'] ?? $event['eventType'] ?? 'custom',
+                'event_name' => $event['event_name'] ?? $event['eventName'] ?? null,
+                'category' => $event['category'] ?? null,
+                'label' => $event['label'] ?? null,
+                'value' => $event['value'] ?? null,
+                'url' => $event['url'] ?? null,
+                'metadata' => $event['metadata'] ?? null,
+            ];
+        }
+
+        if (empty($normalized)) {
+            return 0;
+        }
+
+        RecordEventsBatchJob::dispatchAfterResponse($normalized);
+
+        return count($normalized);
     }
 
     public function getPageViewStats(): array

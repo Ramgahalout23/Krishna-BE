@@ -30,16 +30,29 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'data' => $products]);
     }
 
+    /**
+     * Clamp client-supplied limits: an unbounded ?limit= forces the DB to scan
+     * and serialize the whole catalog (CPU/DB spike vector on shared hosting).
+     */
+    private function clampLimit($value, int $fallback, int $max = 50): int
+    {
+        $n = filter_var($value, FILTER_VALIDATE_INT);
+        if ($n === false || $n < 1) {
+            return $fallback;
+        }
+        return min($n, $max);
+    }
+
     public function featured(Request $request): JsonResponse
     {
-        $products = $this->productService->getFeatured($request->limit ?? 8);
+        $products = $this->productService->getFeatured($this->clampLimit($request->limit, 8));
 
         return response()->json(['success' => true, 'data' => $products]);
     }
 
     public function newArrivals(Request $request): JsonResponse
     {
-        $products = $this->productService->getNewArrivals($request->limit ?? 8);
+        $products = $this->productService->getNewArrivals($this->clampLimit($request->limit, 8));
 
         return response()->json(['success' => true, 'data' => $products]);
     }
@@ -54,7 +67,7 @@ class ProductController extends Controller
             return response()->json(['success' => true, 'data' => []]);
         }
 
-        $products = $this->productService->getBestSellers($request->limit ?? 8);
+        $products = $this->productService->getBestSellers($this->clampLimit($request->limit, 8));
 
         return response()->json(['success' => true, 'data' => $products]);
     }
@@ -62,7 +75,7 @@ class ProductController extends Controller
     public function search(Request $request): JsonResponse
     {
         try {
-            $results = $this->productService->search($request->q, $request->limit ?? 10);
+            $results = $this->productService->search($request->q, $this->clampLimit($request->limit, 10));
 
             return response()->json(['success' => true, 'data' => $results]);
         } catch (AppError $e) {
@@ -266,7 +279,7 @@ class ProductController extends Controller
      */
     public function related(Request $request, string $id): JsonResponse
     {
-        $products = $this->productService->getRelated($id, $request->limit ?? 8);
+        $products = $this->productService->getRelated($id, $this->clampLimit($request->limit, 8));
         return response()->json(['success' => true, 'data' => $products]);
     }
 

@@ -14,6 +14,26 @@ class ProductRepository extends BaseRepository
      */
     public const CUSTOM_TEE_PRODUCT_ID = 'c5b8e3f0-3a1c-4b7e-9d6f-1a2b3c4d5e6f';
 
+    /**
+     * Clamp client-supplied pagination so a single request can't force the DB
+     * to scan and serialize the whole catalog (CPU/DB spike vector on shared
+     * hosting). Repository-level defense in depth: even if a future caller
+     * forgets to clamp at the controller, these methods stay bounded.
+     */
+    private static function clampLimit(int $limit, int $max = 50): int
+    {
+        return $limit < 1 ? 1 : min($limit, $max);
+    }
+
+    private static function clampPerPage($perPage, int $fallback = 20, int $max = 100): int
+    {
+        $n = filter_var($perPage, FILTER_VALIDATE_INT);
+        if ($n === false || $n < 1) {
+            return $fallback;
+        }
+        return min((int) $n, $max);
+    }
+
     protected function modelClass(): string
     {
         return Product::class;
@@ -117,7 +137,7 @@ class ProductRepository extends BaseRepository
         $sortOrder = $filters['sort_order'] ?? 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
-        $perPage = $filters['per_page'] ?? 20;
+        $perPage = $this->clampPerPage($filters['per_page'] ?? 20);
         return $query->paginate($perPage);
     }
 
@@ -131,7 +151,7 @@ class ProductRepository extends BaseRepository
             ->where('id', '!=', self::CUSTOM_TEE_PRODUCT_ID)
             ->where('is_featured', true)
             ->latest()
-            ->take($limit)
+            ->take(self::clampLimit($limit))
             ->get();
     }
 
@@ -144,7 +164,7 @@ class ProductRepository extends BaseRepository
         ])->where('status', 'PUBLISHED')
             ->where('id', '!=', self::CUSTOM_TEE_PRODUCT_ID)
             ->latest()
-            ->take($limit)
+            ->take(self::clampLimit($limit))
             ->get();
     }
 
@@ -157,7 +177,7 @@ class ProductRepository extends BaseRepository
         ])->where('status', 'PUBLISHED')
             ->where('id', '!=', self::CUSTOM_TEE_PRODUCT_ID)
             ->orderBy('view_count', 'desc')
-            ->take($limit)
+            ->take(self::clampLimit($limit))
             ->get();
     }
 
@@ -188,7 +208,7 @@ class ProductRepository extends BaseRepository
                         $q->where('name', 'like', "%{$query}%");
                     }
                 })
-                ->take($limit)
+                ->take(self::clampLimit($limit))
                 ->get();
         } catch (\Exception $e) {
             // Fallback to LIKE search if FULLTEXT is not available
@@ -201,7 +221,7 @@ class ProductRepository extends BaseRepository
                     $q->where('name', 'like', "%{$query}%")
                       ->orWhere('description', 'like', "%{$query}%");
                 })
-                ->take($limit)
+                ->take(self::clampLimit($limit))
                 ->get();
         }
     }
@@ -315,7 +335,7 @@ class ProductRepository extends BaseRepository
             ->where('id', '!=', $productId)
             ->where('id', '!=', self::CUSTOM_TEE_PRODUCT_ID)
             ->where('status', 'PUBLISHED')
-            ->take($limit)
+            ->take(self::clampLimit($limit))
             ->get();
     }
 

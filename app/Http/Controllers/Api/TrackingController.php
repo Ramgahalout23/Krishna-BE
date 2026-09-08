@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Auth;
 
 class TrackingController extends Controller
 {
+    /** Max events accepted per batch request (protects shared MySQL/CPU). */
+    private const MAX_BATCH_EVENTS = 50;
+
     public function __construct(protected TrackingService $trackingService) {}
 
     /**
@@ -115,6 +118,36 @@ class TrackingController extends Controller
             $userId
         );
         return response()->json(['success' => true, 'data' => $event], 201);
+    }
+
+    /**
+     * Record a batch of tracking events in ONE request + one bulk INSERT.
+     * Accepts { events: [...] } (or a bare array body). Fire-and-forget like
+     * the single-event endpoint: responds immediately, insert happens after
+     * the response is sent.
+     */
+    public function recordEventsBatch(Request $request): JsonResponse
+    {
+        $events = $request->input('events');
+        if (!is_array($events)) {
+            // Tolerate a bare array body or a single event object
+            $events = [$request->all()];
+        }
+
+        if (count($events) > self::MAX_BATCH_EVENTS) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Batch too large (max ' . self::MAX_BATCH_EVENTS . ' events per request)',
+            ], 413);
+        }
+
+        if (empty($events)) {
+            return response()->json(['success' => true, 'data' => ['recorded' => 0]]);
+        }
+
+        $recorded = $this->trackingService->recordEventsBatch($events);
+
+        return response()->json(['success' => true, 'data' => ['recorded' => $recorded]]);
     }
 
     public function adminPageViews(): JsonResponse

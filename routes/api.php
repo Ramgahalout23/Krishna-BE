@@ -199,6 +199,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/tracking/session', [TrackingController::class, 'createSession']);
     Route::patch('/tracking/session/{sessionId}/end', [TrackingController::class, 'endSession']);
     Route::post('/tracking/event', [TrackingController::class, 'recordEvent']);
+    Route::post('/tracking/events', [TrackingController::class, 'recordEventsBatch']);
     Route::post('/payments/webhook', [PaymentController::class, 'webhook']);
 
     // Public Recent Orders (for FOMO purchase notifications on storefront)
@@ -244,6 +245,9 @@ Route::prefix('v1')->group(function () {
     // ── Public Custom Design Upload (supports guest users uploading designs before checkout) ──
     Route::post('/custom-designs/upload', [CustomDesignController::class, 'uploadDesignImage']);
 
+    // ── Public Order Tracking by number (guest checkout support — the /track-order page works without login) ──
+    Route::get('/orders/track-by-number/{orderNumber}', [OrderController::class, 'tracking']);
+
     // ── Authenticated User Routes ──
     Route::middleware('auth:sanctum')->group(function () {
         // ── SMS Routes ──
@@ -268,7 +272,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/orders', [OrderController::class, 'store']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::patch('/orders/{id}/cancel', [OrderController::class, 'cancel']);
-        Route::get('/orders/track-by-number/{orderNumber}', [OrderController::class, 'tracking']);
+        // (track-by-number moved to the public group above — guests must be able to track orders)
 
         // Invoice routes must be BEFORE generic /orders/{id}
         Route::get('/orders/{orderId}/invoice', [InvoiceController::class, 'show']);

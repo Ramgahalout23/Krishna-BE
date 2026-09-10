@@ -17,7 +17,7 @@ class CustomerSeeder extends Seeder
         $customerPwd = Hash::make('Demo@123');
 
         $customer1 = User::updateOrCreate(
-            ['email' => 'customer@threvolt.com'],
+            ['email' => 'customer@dotoydo.com'],
             [
                 'first_name' => 'Demo', 'last_name' => 'Customer',
                 'password' => $customerPwd,
@@ -25,7 +25,7 @@ class CustomerSeeder extends Seeder
                 'is_email_verified' => true, 'is_active' => true,
             ]
         );
-        $this->command->info('   ✓ customer@threvolt.com / Demo@123');
+        $this->command->info('   ✓ customer@dotoydo.com / Demo@123');
 
         $users = [$customer1];
         $extraUsers = [

@@ -9,38 +9,40 @@ class CuratedLookSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('🎨 Seeding curated looks...');
+        $this->command->info('🎨 Seeding curated collections...');
+
+        $img = fn(int $id, int $w = 800): string => "https://images.pexels.com/photos/{$id}/pexels-photo-{$id}.jpeg?auto=compress&cs=tinysrgb&w={$w}";
 
         $curatedLooks = [
             [
-                'name' => 'Summer Essentials',
-                'slug' => 'summer-essentials',
-                'description' => 'Light fabrics and breezy fits for the season ahead.',
-                'image_url' => 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800',
+                'name' => 'Birthday Gift Bundles',
+                'slug' => 'birthday-gift-bundles',
+                'description' => 'Toys, gifts and goodies for the little birthday star.',
+                'image_url' => $img(32362463),
                 'display_order' => 0,
                 'is_active' => true,
             ],
             [
-                'name' => 'Streetwear Icons',
-                'slug' => 'streetwear-icons',
-                'description' => 'Bold graphics and oversized silhouettes that define urban style.',
-                'image_url' => 'https://images.unsplash.com/photo-1572495641004-28421ae7c9d2?q=80&w=800',
+                'name' => 'Smart Living Tech',
+                'slug' => 'smart-living-tech',
+                'description' => 'Earbuds, bands and chargers that keep up with your day.',
+                'image_url' => $img(34241799),
                 'display_order' => 1,
                 'is_active' => true,
             ],
             [
-                'name' => 'Minimal Luxe',
-                'slug' => 'minimal-luxe',
-                'description' => 'Clean lines. Subtle details. Understated elegance for everyday.',
-                'image_url' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=800',
+                'name' => 'Kitchen Refresh',
+                'slug' => 'kitchen-refresh',
+                'description' => 'Cookware, containers and dinnerware for a happier home.',
+                'image_url' => $img(15245007),
                 'display_order' => 2,
                 'is_active' => true,
             ],
             [
                 'name' => 'New Arrivals',
                 'slug' => 'new-arrivals',
-                'description' => 'The freshest drops — be the first to wear them.',
-                'image_url' => 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=800',
+                'description' => 'The freshest drops across the mart — shop them first.',
+                'image_url' => $img(264985),
                 'display_order' => 3,
                 'is_active' => true,
             ],
@@ -49,6 +51,6 @@ class CuratedLookSeeder extends Seeder
         foreach ($curatedLooks as $look) {
             CuratedLook::create($look);
         }
-        $this->command->info('   ✓ ' . count($curatedLooks) . ' curated looks created');
+        $this->command->info('   ✓ ' . count($curatedLooks) . ' curated collections created');
     }
 }

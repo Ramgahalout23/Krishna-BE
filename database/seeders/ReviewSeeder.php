@@ -23,18 +23,18 @@ class ReviewSeeder extends Seeder
             return;
         }
         if (empty($users)) {
-            $users = [User::where('email', 'customer@threvolt.com')->value('id')];
+            $users = [User::where('email', 'customer@dotoydo.com')->value('id')];
         }
 
         $reviewData = [
-            ['rating' => 5, 'title' => 'Amazing quality!', 'comment' => 'Fabric is super soft and the fit is perfect. Highly recommended!'],
-            ['rating' => 4, 'title' => 'Great value', 'comment' => 'Good quality t-shirt at affordable price.'],
-            ['rating' => 5, 'title' => 'Best purchase ever', 'comment' => 'The oversized fit is exactly what I wanted!'],
-            ['rating' => 5, 'title' => 'Worth every rupee', 'comment' => 'Premium quality fabric. Color is exactly as shown.'],
-            ['rating' => 4, 'title' => 'Awesome design', 'comment' => 'The graphic is amazing. Everyone asks about it.'],
-            ['rating' => 4, 'title' => 'Nice polo', 'comment' => 'Great fit and fabric quality.'],
-            ['rating' => 5, 'title' => 'Best value pack', 'comment' => 'Three high-quality tees at an amazing price.'],
-            ['rating' => 4, 'title' => 'Great cap', 'comment' => 'Structured fit, looks premium.'],
+            ['rating' => 5, 'title' => 'Amazing quality!', 'comment' => 'Exactly as shown in the pictures and my kid absolutely loves it. Highly recommended!'],
+            ['rating' => 4, 'title' => 'Great value', 'comment' => 'Good quality product at an affordable price.'],
+            ['rating' => 5, 'title' => 'Best purchase ever', 'comment' => 'Arrived fast and well packed. Worth every rupee!'],
+            ['rating' => 5, 'title' => 'Worth every rupee', 'comment' => 'Premium quality. Color is exactly as shown.'],
+            ['rating' => 4, 'title' => 'Awesome product', 'comment' => 'Very happy with the purchase. Everyone asks where I got it from.'],
+            ['rating' => 4, 'title' => 'Nice buy', 'comment' => 'Great product and quick delivery.'],
+            ['rating' => 5, 'title' => 'Best value pack', 'comment' => 'Ordered two and both are fantastic at an amazing price.'],
+            ['rating' => 4, 'title' => 'Great gift', 'comment' => 'Perfect gift for my nephew. Packaging was lovely.'],
         ];
 
         // Track which products get reviews to update ratings later

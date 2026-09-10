@@ -18,7 +18,7 @@ class AdminTestUserSeeder extends Seeder
      *   php artisan db:seed --class=AdminTestUserSeeder
      *
      * Credentials:
-     *   Email:    admin@threvolt.com
+     *   Email:    admin@dotoydo.com
      *   Password: Admin@123
      */
     public function run(): void
@@ -26,10 +26,10 @@ class AdminTestUserSeeder extends Seeder
         $this->command->info('Seeding admin test user...');
 
         $admin = User::updateOrCreate(
-            ['email' => 'admin@threvolt.com'],
+            ['email' => 'admin@dotoydo.com'],
             [
                 'first_name'       => 'Admin',
-                'last_name'        => 'THREVOLT',
+                'last_name'        => 'dotoydo',
                 'password'         => Hash::make('Admin@123'),
                 'phone_number'     => '+91 98765 43210',
                 'role'             => 'ADMIN',
@@ -46,7 +46,7 @@ class AdminTestUserSeeder extends Seeder
         $this->command->info('');
         $this->command->info('Admin test user ready!');
         $this->command->info('----------------------------');
-        $this->command->info('  Email:        admin@threvolt.com');
+        $this->command->info('  Email:        admin@dotoydo.com');
         $this->command->info('  Password:     Admin@123');
         $this->command->info('  Role:         ' . $admin->role);
         $this->command->info('  UUID:         ' . $admin->id);

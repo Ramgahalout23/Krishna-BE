@@ -13,17 +13,17 @@ class CategoryBrandSeeder extends Seeder
     {
         $this->command->info('📂 Seeding categories...');
 
-        $storeName = 'THREVOLT';
+        $storeName = 'dotoydo';
         try {
             $val = Setting::where('module', 'SITE')->where('key', 'storeName')->value('value');
             if ($val) $storeName = $val;
         } catch (\Exception $e) {}
 
         $catData = [
-            ['name' => 'Legendary Series', 'slug' => 'legendary-series', 'description' => 'Premium t-shirt collections with iconic designs — made for legends.', 'image' => 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=400'],
-            ['name' => 'Official Merchandise', 'slug' => 'official-merchandise', 'description' => 'Licensed and official merchandise — movies, music, sports & more.', 'image' => 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=400'],
-            ['name' => 'Oversized Collection', 'slug' => 'oversized-collection', 'description' => 'Premium oversized fit t-shirts — drop shoulder, boxy & classic cuts.', 'image' => 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=400'],
-            ['name' => 'Accessories', 'slug' => 'accessories', 'description' => 'Complete your look — caps, bags, phone cases & more.', 'image' => 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=400'],
+            ['name' => 'Toys & Games', 'slug' => 'toys-games', 'description' => 'Soft toys, action figures, building blocks, puzzles, RC cars & more — fun for every age.', 'image' => 'https://images.pexels.com/photos/8409851/pexels-photo-8409851.jpeg?auto=compress&cs=tinysrgb&w=800'],
+            ['name' => 'Electronics & Gadgets', 'slug' => 'electronics', 'description' => 'Earbuds, speakers, smart bands, power banks & everyday tech essentials.', 'image' => 'https://images.pexels.com/photos/34241799/pexels-photo-34241799.jpeg?auto=compress&cs=tinysrgb&w=800'],
+            ['name' => 'Home & Kitchen', 'slug' => 'home-kitchen', 'description' => 'Cookware, storage, bedding, dinnerware & everything your home needs.', 'image' => 'https://images.pexels.com/photos/15245007/pexels-photo-15245007.jpeg?auto=compress&cs=tinysrgb&w=800'],
+            ['name' => 'Sports & Outdoors', 'slug' => 'sports-outdoors', 'description' => 'Fitness gear, yoga mats, racket sports & outdoor equipment for an active life.', 'image' => 'https://images.pexels.com/photos/4793328/pexels-photo-4793328.jpeg?auto=compress&cs=tinysrgb&w=800'],
         ];
         $categories = [];
         foreach ($catData as $c) {
@@ -32,25 +32,31 @@ class CategoryBrandSeeder extends Seeder
         }
 
         $subData = [
-            ['parent' => 'legendary-series', 'children' => [
-                ['name' => "Men's Legendary", 'slug' => 'mens-legendary'],
-                ['name' => "Women's Legendary", 'slug' => 'womens-legendary'],
-                ['name' => 'Unisex Legendary', 'slug' => 'unisex-legendary'],
+            ['parent' => 'toys-games', 'children' => [
+                ['name' => 'Soft Toys & Plush', 'slug' => 'soft-toys-plush'],
+                ['name' => 'Action Figures & Collectibles', 'slug' => 'action-figures'],
+                ['name' => 'Building & Construction', 'slug' => 'building-construction'],
+                ['name' => 'Board Games & Puzzles', 'slug' => 'board-games-puzzles'],
+                ['name' => 'Remote Control & Vehicles', 'slug' => 'rc-vehicles'],
+                ['name' => 'Educational Toys', 'slug' => 'educational-toys'],
             ]],
-            ['parent' => 'official-merchandise', 'children' => [
-                ['name' => 'Movie Merchandise', 'slug' => 'movie-merchandise'],
-                ['name' => 'Music Merchandise', 'slug' => 'music-merchandise'],
-                ['name' => 'Sports Merchandise', 'slug' => 'sports-merchandise'],
+            ['parent' => 'electronics', 'children' => [
+                ['name' => 'Audio & Headphones', 'slug' => 'audio-headphones'],
+                ['name' => 'Wearables & Smart Devices', 'slug' => 'wearables'],
+                ['name' => 'Mobile & Charging Accessories', 'slug' => 'mobile-charging'],
+                ['name' => 'Power Banks', 'slug' => 'power-banks'],
             ]],
-            ['parent' => 'oversized-collection', 'children' => [
-                ['name' => 'Drop Shoulder', 'slug' => 'drop-shoulder'],
-                ['name' => 'Boxy Fit', 'slug' => 'boxy-fit'],
-                ['name' => 'Classic Oversized', 'slug' => 'classic-oversized'],
+            ['parent' => 'home-kitchen', 'children' => [
+                ['name' => 'Cookware', 'slug' => 'cookware'],
+                ['name' => 'Storage & Organizers', 'slug' => 'storage-organizers'],
+                ['name' => 'Bedding & Linen', 'slug' => 'bedding-linen'],
+                ['name' => 'Dinnerware', 'slug' => 'dinnerware'],
             ]],
-            ['parent' => 'accessories', 'children' => [
-                ['name' => 'Caps', 'slug' => 'caps'],
-                ['name' => 'Bags', 'slug' => 'bags'],
-                ['name' => 'Phone Cases', 'slug' => 'phone-cases'],
+            ['parent' => 'sports-outdoors', 'children' => [
+                ['name' => 'Fitness Equipment', 'slug' => 'fitness-equipment'],
+                ['name' => 'Yoga & Exercise', 'slug' => 'yoga-exercise'],
+                ['name' => 'Racket Sports', 'slug' => 'racket-sports'],
+                ['name' => 'Outdoor & Camping', 'slug' => 'outdoor-camping'],
             ]],
         ];
         foreach ($subData as $group) {
@@ -69,9 +75,11 @@ class CategoryBrandSeeder extends Seeder
 
         $this->command->info('🏷️  Seeding brands...');
         $brandData = [
-            ['name' => $storeName, 'slug' => 'threvolt', 'logo' => 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=200', 'description' => 'In-house premium brand'],
-            ['name' => 'Urban Threads', 'slug' => 'urban-threads', 'logo' => 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=200', 'description' => 'Streetwear essentials'],
-            ['name' => 'NeoPrint', 'slug' => 'neo-print', 'logo' => 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=200', 'description' => 'Graphic prints specialist'],
+            ['name' => $storeName, 'slug' => 'dotoydo', 'logo' => 'https://images.pexels.com/photos/6219117/pexels-photo-6219117.jpeg?auto=compress&cs=tinysrgb&w=200', 'description' => 'In-house mart brand — everyday essentials under one roof'],
+            ['name' => 'PlayNest', 'slug' => 'playnest', 'logo' => 'https://images.pexels.com/photos/38807149/pexels-photo-38807149.jpeg?auto=compress&cs=tinysrgb&w=200', 'description' => 'Toys & games for curious kids'],
+            ['name' => 'TechVibe', 'slug' => 'techvibe', 'logo' => 'https://images.pexels.com/photos/33298188/pexels-photo-33298188.jpeg?auto=compress&cs=tinysrgb&w=200', 'description' => 'Smart gadgets for everyday life'],
+            ['name' => 'HomeCraft', 'slug' => 'homecraft', 'logo' => 'https://images.pexels.com/photos/4096909/pexels-photo-4096909.jpeg?auto=compress&cs=tinysrgb&w=200', 'description' => 'Home & kitchen essentials'],
+            ['name' => 'FitForte', 'slug' => 'fitforte', 'logo' => 'https://images.pexels.com/photos/29224210/pexels-photo-29224210.jpeg?auto=compress&cs=tinysrgb&w=200', 'description' => 'Sports & fitness gear'],
         ];
         foreach ($brandData as $b) {
             Brand::create($b);

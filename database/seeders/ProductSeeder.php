@@ -12,14 +12,15 @@ use App\Models\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
     /**
      * Run the ProductSeeder.
      *
-     * Seeds categories, brands, and 15 products with variants.
+     * Seeds categories, brands, and mart products (toys, electronics,
+     * home & kitchen, sports & outdoors) with color variants.
+     *
      * Safe to run on both fresh and existing databases:
      * - Creates categories/brands only if they don't exist
      * - Truncates only product-related tables (not categories/brands)
@@ -35,11 +36,10 @@ class ProductSeeder extends Seeder
         // ─────────────────────────────────────────────
         $this->command->info('📂 Ensuring categories...');
         $catDefs = [
-            ['key' => 'tees',   'name' => "Men's Tees",       'slug' => 'mens-tees',       'desc' => 'Premium everyday t-shirts'],
-            ['key' => 'polo',   'name' => 'Polo Shirts',       'slug' => 'polo-shirts',     'desc' => 'Classic polo shirts'],
-            ['key' => 'hoodie', 'name' => 'Hoodies & Sweats',  'slug' => 'hoodies-sweats',  'desc' => 'Oversized hoodies and sweatshirts'],
-            ['key' => 'outer',  'name' => 'Outerwear',          'slug' => 'outerwear',       'desc' => 'Jackets and layers'],
-            ['key' => 'acc',    'name' => 'Accessories',        'slug' => 'accessories',     'desc' => 'Caps, bags & more'],
+            ['key' => 'toys',    'name' => 'Toys & Games',            'slug' => 'toys-games',    'desc' => 'Soft toys, figures, blocks, puzzles & RC fun'],
+            ['key' => 'elec',    'name' => 'Electronics & Gadgets',   'slug' => 'electronics',    'desc' => 'Earbuds, speakers, smart bands & power banks'],
+            ['key' => 'home',    'name' => 'Home & Kitchen',          'slug' => 'home-kitchen',   'desc' => 'Cookware, storage, bedding & dinnerware'],
+            ['key' => 'sports',  'name' => 'Sports & Outdoors',       'slug' => 'sports-outdoors', 'desc' => 'Fitness gear, yoga mats & racket sports'],
         ];
         $cats = [];
         foreach ($catDefs as $c) {
@@ -55,15 +55,15 @@ class ProductSeeder extends Seeder
         // 2. ENSURE BRAND EXISTS
         // ─────────────────────────────────────────────
         $this->command->info('🏷️  Ensuring brand...');
-        $storeName = 'THREVOLT';
+        $storeName = 'dotoydo';
         try {
             $val = Setting::where('module', 'SITE')->where('key', 'storeName')->value('value');
             if ($val) $storeName = $val;
         } catch (\Exception $e) {}
         $brand = Brand::firstOrCreate(
-            ['slug' => 'threvolt'],
-            ['name' => $storeName, 'description' => 'In-house premium brand',
-             'logo' => 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=200']
+            ['slug' => 'dotoydo'],
+            ['name' => $storeName, 'description' => 'In-house mart brand',
+             'logo' => 'https://images.pexels.com/photos/6219117/pexels-photo-6219117.jpeg?auto=compress&cs=tinysrgb&w=200']
         );
         $this->command->info('   ✓ Brand ready');
 
@@ -84,241 +84,236 @@ class ProductSeeder extends Seeder
         // ─────────────────────────────────────────────
         $this->command->info('📦 Creating products...');
 
-        $sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+        $img = function (int $id, int $w = 800): string {
+            return "https://images.pexels.com/photos/{$id}/pexels-photo-{$id}.jpeg?auto=compress&cs=tinysrgb&w={$w}";
+        };
 
         $productDefs = [
-            // ── Men's Tees ──
+            // ── Toys & Games ──
             [
-                'name' => 'Urban Oversized Tee — Black',
-                'slug' => 'urban-oversized-tee-black',
-                'cat' => 'tees',
-                'price' => 599, 'old_price' => 999,
-                'img' => 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1572495641004-28421ae7c9d2?q=80&w=800',
-                'badge' => 'Bestseller',
-                'rating' => 4.8, 'reviews' => 0,
-                'featured' => true, 'qty' => 120,
-                'colors' => [
-                    ['color' => 'Black', 'price' => 599],
-                    ['color' => 'White', 'price' => 599],
-                    ['color' => 'Navy', 'price' => 599],
-                    ['color' => 'Grey', 'price' => 649],
-                    ['color' => 'Olive', 'price' => 649],
-                ],
-            ],
-            [
-                'name' => 'Abstract Art Graphic Tee',
-                'slug' => 'abstract-art-graphic-tee',
-                'cat' => 'tees',
+                'name' => 'Cuddly Plush Teddy Bear — 32 cm',
+                'slug' => 'cuddly-plush-teddy-bear-32cm',
+                'cat' => 'toys',
                 'price' => 499, 'old_price' => 799,
-                'img' => 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800',
-                'badge' => 'Trending',
-                'rating' => 4.7, 'reviews' => 0,
-                'featured' => true, 'qty' => 85,
+                'img' => $img(38807149), 'img2' => $img(35579568),
+                'badge' => 'Bestseller',
+                'rating' => 4.9, 'featured' => true, 'qty' => 60,
                 'colors' => [
-                    ['color' => 'White', 'price' => 499],
-                    ['color' => 'Black', 'price' => 499],
-                    ['color' => 'Grey', 'price' => 549],
+                    ['color' => 'Brown', 'price' => 499],
+                    ['color' => 'Cream', 'price' => 499],
+                    ['color' => 'Pink', 'price' => 529],
                 ],
             ],
             [
-                'name' => 'Essential Plain Tee — White',
-                'slug' => 'essential-plain-tee-white',
-                'cat' => 'tees',
-                'price' => 349, 'old_price' => 599,
-                'img' => 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800',
-                'badge' => 'Value',
-                'rating' => 4.5, 'reviews' => 0,
-                'featured' => true, 'qty' => 200,
-                'colors' => [
-                    ['color' => 'White', 'price' => 349],
-                    ['color' => 'Black', 'price' => 349],
-                    ['color' => 'Grey', 'price' => 349],
-                    ['color' => 'Navy', 'price' => 399],
-                ],
-            ],
-            [
-                'name' => 'Tokyo Streetwear Graphic Tee',
-                'slug' => 'tokyo-streetwear-graphic-tee',
-                'cat' => 'tees',
-                'price' => 549, 'old_price' => 899,
-                'img' => 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1612714304529-e225036e6c4c?q=80&w=800',
-                'badge' => 'New',
-                'rating' => 4.9, 'reviews' => 0,
-                'featured' => true, 'qty' => 65,
-                'colors' => [
-                    ['color' => 'Black', 'price' => 549],
-                    ['color' => 'White', 'price' => 549],
-                ],
-            ],
-            [
-                'name' => 'Minimal Logo Tee — Navy',
-                'slug' => 'minimal-logo-tee-navy',
-                'cat' => 'tees',
-                'price' => 449, 'old_price' => 749,
-                'img' => 'https://images.unsplash.com/photo-1612714304529-e225036e6c4c?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=800',
-                'badge' => 'New',
-                'rating' => 4.6, 'reviews' => 0,
-                'featured' => false, 'qty' => 90,
-                'colors' => [
-                    ['color' => 'Navy', 'price' => 449],
-                    ['color' => 'Black', 'price' => 449],
-                    ['color' => 'Burgundy', 'price' => 479],
-                ],
-            ],
-
-            // ── Polo Shirts ──
-            [
-                'name' => 'Classic Polo — Forest Green',
-                'slug' => 'classic-polo-forest-green',
-                'cat' => 'polo',
-                'price' => 699, 'old_price' => 1199,
-                'img' => 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=800',
-                'badge' => 'New',
-                'rating' => 4.6, 'reviews' => 0,
-                'featured' => false, 'qty' => 70,
-                'colors' => [
-                    ['color' => 'Green', 'price' => 699],
-                    ['color' => 'Navy', 'price' => 699],
-                    ['color' => 'White', 'price' => 699],
-                ],
-            ],
-
-            // ── Hoodies & Sweats ──
-            [
-                'name' => 'Oversized Hoodie — Black',
-                'slug' => 'oversized-hoodie-black',
-                'cat' => 'hoodie',
+                'name' => 'Stunt RC Car — 2.4 GHz Remote Control',
+                'slug' => 'stunt-rc-car-2-4ghz',
+                'cat' => 'toys',
                 'price' => 1299, 'old_price' => 1999,
-                'img' => 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?q=80&w=800',
-                'badge' => 'Bestseller',
-                'rating' => 4.7, 'reviews' => 0,
-                'featured' => true, 'qty' => 50,
-                'colors' => [
-                    ['color' => 'Black', 'price' => 1299],
-                    ['color' => 'Grey', 'price' => 1299],
-                    ['color' => 'Navy', 'price' => 1349],
-                ],
-            ],
-            [
-                'name' => 'Full-Zip Sweatshirt — Cream',
-                'slug' => 'full-zip-sweatshirt-cream',
-                'cat' => 'hoodie',
-                'price' => 999, 'old_price' => 1599,
-                'img' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?q=80&w=800',
+                'img' => $img(9227215), 'img2' => $img(34080822),
                 'badge' => 'Trending',
-                'rating' => 4.5, 'reviews' => 0,
-                'featured' => true, 'qty' => 40,
+                'rating' => 4.7, 'featured' => true, 'qty' => 40,
                 'colors' => [
-                    ['color' => 'Cream', 'price' => 999],
-                    ['color' => 'Black', 'price' => 999],
-                ],
-            ],
-
-            // ── Outerwear ──
-            [
-                'name' => 'Bomber Jacket — Olive',
-                'slug' => 'bomber-jacket-olive',
-                'cat' => 'outer',
-                'price' => 1899, 'old_price' => 2999,
-                'img' => 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800',
-                'badge' => 'Limited',
-                'rating' => 4.8, 'reviews' => 0,
-                'featured' => true, 'qty' => 25,
-                'colors' => [
-                    ['color' => 'Olive', 'price' => 1899],
-                    ['color' => 'Black', 'price' => 1899],
+                    ['color' => 'Yellow', 'price' => 1299],
+                    ['color' => 'Red', 'price' => 1299],
+                    ['color' => 'Blue', 'price' => 1349],
                 ],
             ],
             [
-                'name' => 'Denim Jacket — Light Wash',
-                'slug' => 'denim-jacket-light-wash',
-                'cat' => 'outer',
-                'price' => 1599, 'old_price' => 2499,
-                'img' => 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800',
+                'name' => 'Wooden Building Blocks — 120-Piece Set',
+                'slug' => 'wooden-building-blocks-120pcs',
+                'cat' => 'toys',
+                'price' => 699, 'old_price' => 1099,
+                'img' => $img(31061852), 'img2' => $img(6693306),
+                'badge' => 'Educational',
+                'rating' => 4.8, 'featured' => true, 'qty' => 75,
+                'colors' => [],
+            ],
+            [
+                'name' => 'Family Board Games Combo — Ludo & Snakes and Ladders',
+                'slug' => 'family-board-games-combo',
+                'cat' => 'toys',
+                'price' => 449, 'old_price' => 699,
+                'img' => $img(207924), 'img2' => $img(37983584),
+                'badge' => 'Value',
+                'rating' => 4.6, 'featured' => false, 'qty' => 100,
+                'colors' => [],
+            ],
+            [
+                'name' => 'Collectible Superhero Figure — Limited Drop',
+                'slug' => 'collectible-superhero-figure',
+                'cat' => 'toys',
+                'price' => 899, 'old_price' => 1299,
+                'img' => $img(8000986), 'img2' => $img(7258495),
+                'badge' => 'Collector',
+                'rating' => 4.8, 'featured' => false, 'qty' => 0,
+                'colors' => [],
+            ],
+            [
+                'name' => 'Speed Cube Puzzle — 3×3 Smooth Turn',
+                'slug' => 'speed-cube-puzzle-3x3',
+                'cat' => 'toys',
+                'price' => 199, 'old_price' => 349,
+                'img' => $img(19673918), 'img2' => $img(10285256),
                 'badge' => null,
-                'rating' => 4.4, 'reviews' => 0,
-                'featured' => false, 'qty' => 35,
-                'colors' => [
-                    ['color' => 'Light Wash', 'price' => 1599],
-                    ['color' => 'Medium Wash', 'price' => 1599],
-                    ['color' => 'Dark Wash', 'price' => 1699],
-                ],
+                'rating' => 4.5, 'featured' => false, 'qty' => 3,
+                'colors' => [],
             ],
 
-            // ── Accessories ──
+            // ── Electronics & Gadgets ──
             [
-                'name' => 'Premium Cap — Classic Black',
-                'slug' => 'premium-cap-classic-black',
-                'cat' => 'acc',
-                'price' => 399, 'old_price' => 699,
-                'img' => 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1556306535-0f09a537bee0?q=80&w=800',
+                'name' => 'Wireless Earbuds with Charging Case — BT 5.3',
+                'slug' => 'wireless-earbuds-bt53',
+                'cat' => 'elec',
+                'price' => 899, 'old_price' => 1499,
+                'img' => $img(33298188), 'img2' => $img(30981655),
                 'badge' => 'Bestseller',
-                'rating' => 4.5, 'reviews' => 0,
-                'featured' => true, 'qty' => 150,
+                'rating' => 4.6, 'featured' => true, 'qty' => 120,
                 'colors' => [
-                    ['color' => 'Black', 'price' => 399],
-                    ['color' => 'Navy', 'price' => 399],
-                    ['color' => 'White', 'price' => 399],
+                    ['color' => 'Black', 'price' => 899],
+                    ['color' => 'White', 'price' => 899],
                 ],
             ],
             [
-                'name' => 'Canvas Tote Bag — Natural',
-                'slug' => 'canvas-tote-bag-natural',
-                'cat' => 'acc',
-                'price' => 349, 'old_price' => 599,
-                'img' => 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800',
-                'badge' => 'Eco',
-                'rating' => 4.3, 'reviews' => 0,
-                'featured' => false, 'qty' => 200,
-                'colors' => [], // no size/color variants — simple product
+                'name' => 'Portable Bluetooth Speaker — 10W Deep Bass',
+                'slug' => 'portable-bluetooth-speaker-10w',
+                'cat' => 'elec',
+                'price' => 1199, 'old_price' => 1799,
+                'img' => $img(34241799), 'img2' => $img(33693664),
+                'badge' => 'Trending',
+                'rating' => 4.5, 'featured' => false, 'qty' => 80,
+                'colors' => [
+                    ['color' => 'Black', 'price' => 1199],
+                    ['color' => 'Camo', 'price' => 1249],
+                ],
             ],
-
-            // ── SPECIAL TEST PRODUCTS ──
-
-            // Out of stock (OOS badge test)
             [
-                'name' => 'Classic Crew Neck Tee — OOS Test',
-                'slug' => 'classic-crew-neck-oos-test',
-                'cat' => 'tees',
-                'price' => 399, 'old_price' => 699,
-                'img' => 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800',
+                'name' => 'Smart Fitness Band — Heart Rate & SpO₂',
+                'slug' => 'smart-fitness-band',
+                'cat' => 'elec',
+                'price' => 999, 'old_price' => 1599,
+                'img' => $img(6846257), 'img2' => $img(1080751),
+                'badge' => 'New',
+                'rating' => 4.4, 'featured' => true, 'qty' => 90,
+                'colors' => [
+                    ['color' => 'Black', 'price' => 999],
+                    ['color' => 'Teal', 'price' => 1049],
+                ],
+            ],
+            [
+                'name' => 'Power Bank 20000mAh — Fast Charging',
+                'slug' => 'power-bank-20000mah',
+                'cat' => 'elec',
+                'price' => 1099, 'old_price' => 1699,
+                'img' => $img(8137314), 'img2' => $img(10104284),
                 'badge' => null,
-                'rating' => 4.0, 'reviews' => 0,
-                'featured' => false, 'qty' => 0,
+                'rating' => 4.7, 'featured' => false, 'qty' => 110,
                 'colors' => [
-                    ['color' => 'White', 'price' => 399],
-                    ['color' => 'Black', 'price' => 399],
+                    ['color' => 'Black', 'price' => 1099],
+                    ['color' => 'Blue', 'price' => 1099],
                 ],
             ],
 
-            // Low stock (Low stock warning test)
+            // ── Home & Kitchen ──
             [
-                'name' => 'Striped Campus Tee — Blue — Low Stock',
-                'slug' => 'striped-campus-tee-blue-low-stock',
-                'cat' => 'tees',
-                'price' => 499, 'old_price' => 849,
-                'img' => 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=800',
-                'img2' => 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800',
+                'name' => 'Non-Stick Cookware Set — 6-Piece',
+                'slug' => 'non-stick-cookware-set-6pc',
+                'cat' => 'home',
+                'price' => 1999, 'old_price' => 2999,
+                'img' => $img(4509047), 'img2' => $img(29462835),
+                'badge' => 'Hot Deal',
+                'rating' => 4.5, 'featured' => true, 'qty' => 35,
+                'colors' => [],
+            ],
+            [
+                'name' => 'Insulated Steel Water Bottle — 1 Litre',
+                'slug' => 'insulated-steel-water-bottle-1l',
+                'cat' => 'home',
+                'price' => 649, 'old_price' => 999,
+                'img' => $img(7879895), 'img2' => $img(7879832),
                 'badge' => null,
-                'rating' => 4.4, 'reviews' => 0,
-                'featured' => false, 'qty' => 3,
+                'rating' => 4.6, 'featured' => false, 'qty' => 150,
                 'colors' => [
-                    ['color' => 'Blue', 'price' => 499],
-                    ['color' => 'Navy', 'price' => 499],
+                    ['color' => 'Steel', 'price' => 649],
+                    ['color' => 'Black', 'price' => 649],
                 ],
+            ],
+            [
+                'name' => 'Premium Cotton Bedsheet Set — King Size',
+                'slug' => 'premium-cotton-bedsheet-king',
+                'cat' => 'home',
+                'price' => 999, 'old_price' => 1799,
+                'img' => $img(28513849), 'img2' => $img(30618181),
+                'badge' => null,
+                'rating' => 4.4, 'featured' => false, 'qty' => 70,
+                'colors' => [
+                    ['color' => 'White', 'price' => 999],
+                    ['color' => 'Beige', 'price' => 1049],
+                ],
+            ],
+            [
+                'name' => 'Food Storage Containers — Set of 8',
+                'slug' => 'food-storage-containers-set-8',
+                'cat' => 'home',
+                'price' => 549, 'old_price' => 899,
+                'img' => $img(4096909), 'img2' => $img(14206966),
+                'badge' => 'Value',
+                'rating' => 4.5, 'featured' => false, 'qty' => 130,
+                'colors' => [],
+            ],
+            [
+                'name' => 'Ceramic Dinnerware Set — 12-Piece',
+                'slug' => 'ceramic-dinnerware-set-12pc',
+                'cat' => 'home',
+                'price' => 1599, 'old_price' => 2499,
+                'img' => $img(14320923), 'img2' => $img(4234527),
+                'badge' => 'New',
+                'rating' => 4.7, 'featured' => true, 'qty' => 45,
+                'colors' => [],
+            ],
+
+            // ── Sports & Outdoors ──
+            [
+                'name' => 'Premium Yoga Mat — 6mm Non-Slip',
+                'slug' => 'premium-yoga-mat-6mm',
+                'cat' => 'sports',
+                'price' => 799, 'old_price' => 1299,
+                'img' => $img(4793328), 'img2' => $img(4028197),
+                'badge' => 'Bestseller',
+                'rating' => 4.8, 'featured' => true, 'qty' => 95,
+                'colors' => [
+                    ['color' => 'Purple', 'price' => 799],
+                    ['color' => 'Yellow', 'price' => 799],
+                ],
+            ],
+            [
+                'name' => 'Badminton Racket Set — 2 Rackets + 3 Shuttlecocks',
+                'slug' => 'badminton-racket-set',
+                'cat' => 'sports',
+                'price' => 999, 'old_price' => 1499,
+                'img' => $img(12887090), 'img2' => $img(32874231),
+                'badge' => null,
+                'rating' => 4.6, 'featured' => false, 'qty' => 60,
+                'colors' => [],
+            ],
+            [
+                'name' => 'Hex Dumbbell Pair — 5 kg',
+                'slug' => 'hex-dumbbell-pair-5kg',
+                'cat' => 'sports',
+                'price' => 1399, 'old_price' => 1999,
+                'img' => $img(29224210), 'img2' => $img(4959808),
+                'badge' => null,
+                'rating' => 4.7, 'featured' => false, 'qty' => 40,
+                'colors' => [],
+            ],
+            [
+                'name' => 'Resistance Bands Set — 5 Resistance Levels',
+                'slug' => 'resistance-bands-set-5',
+                'cat' => 'sports',
+                'price' => 499, 'old_price' => 799,
+                'img' => $img(8846345), 'img2' => $img(6516206),
+                'badge' => 'Value',
+                'rating' => 4.5, 'featured' => false, 'qty' => 140,
+                'colors' => [],
             ],
         ];
 
@@ -328,22 +323,22 @@ class ProductSeeder extends Seeder
             $prod = Product::create([
                 'name'              => $def['name'],
                 'slug'              => $def['slug'],
-                'description'       => "Premium quality {$def['name']}. Crafted from high-grade materials for lasting comfort and style.",
-                'short_description' => substr("Premium {$def['name']} — quality crafted.", 0, 100),
+                'description'       => "{$def['name']}. Trusted quality, safe materials, and honest pricing — shop it at {$storeName}, your everyday mart.",
+                'short_description' => substr("{$def['name']} — quality you can trust.", 0, 100),
                 'price'             => $def['price'],
                 'old_price'         => $def['old_price'],
-                'cost'              => round($def['price'] * 0.4, 2),
+                'cost'              => round($def['price'] * 0.45, 2),
                 'quantity'          => $def['qty'],
-                'sku'               => 'SKU-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                'sku'               => 'DOT-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
                 'category_id'       => $cats[$def['cat']],
                 'brand_id'          => $brand->id,
                 'status'            => 'PUBLISHED',
                 'is_featured'       => $def['featured'],
                 'badge'             => $def['badge'],
                 'rating'            => $def['rating'],
-                'review_count'      => $def['reviews'],
+                'review_count'      => 0,
                 'seo_title'         => $def['name'] . ' | ' . $storeName,
-                'seo_description'   => "Shop {$def['name']} at {$storeName}. Premium quality with free shipping.",
+                'seo_description'   => "Shop {$def['name']} at {$storeName}. Quality checked, safe for family, with easy returns and fast delivery.",
             ]);
 
             // Images
@@ -359,29 +354,22 @@ class ProductSeeder extends Seeder
                 'damaged_quantity'   => 0,
             ]);
 
-            // ── Variants ──
+            // ── Variants (color options — one variant per color) ──
             if (!empty($def['colors'])) {
+                $basePerColor = (int) floor($def['qty'] / count($def['colors']));
                 foreach ($def['colors'] as $config) {
-                    foreach ($sizes as $size) {
-                        // Randomize variant stock within a range
-                        if ($def['qty'] === 0) {
-                            $vqty = 0;
-                        } elseif ($def['qty'] <= 5) {
-                            // Low stock product: spread thin
-                            $vqty = max(0, min($def['qty'], rand(0, 2)));
-                        } else {
-                            $vqty = rand(3, max(4, (int)($def['qty'] / count($def['colors']) / count($sizes))));
-                        }
+                    $vqty = $def['qty'] === 0
+                        ? 0
+                        : ($def['qty'] <= 5 ? max(0, min($def['qty'], rand(0, 2))) : max(1, $basePerColor));
 
-                        ProductVariant::create([
-                            'product_id' => $prod->id,
-                            'name'       => $def['name'] . ' - ' . $config['color'] . ' - ' . $size,
-                            'sku'        => $prod->sku . '-' . strtoupper(substr($config['color'], 0, 3)) . '-' . $size,
-                            'attributes' => json_encode(['size' => $size, 'color' => $config['color']]),
-                            'price'      => $config['price'],
-                            'quantity'   => $vqty,
-                        ]);
-                    }
+                    ProductVariant::create([
+                        'product_id' => $prod->id,
+                        'name'       => $def['name'] . ' - ' . $config['color'],
+                        'sku'        => $prod->sku . '-' . strtoupper(substr(str_replace(' ', '', $config['color']), 0, 4)),
+                        'attributes' => json_encode(['color' => $config['color']]),
+                        'price'      => $config['price'],
+                        'quantity'   => $vqty,
+                    ]);
                 }
             }
 
@@ -410,19 +398,19 @@ class ProductSeeder extends Seeder
             $colorAttr = $p->variants->pluck('attributes')->filter()->map(fn($a) => $a['color'] ?? '')->unique()->filter()->implode(', ');
             $badge = $p->badge ? " [{$p->badge}]" : '';
             $qtyIcon = $p->quantity === 0 ? ' 🔴 OOS' : ($p->quantity <= 5 ? ' 🟡 LOW' : ' 🟢');
-        $this->command->info("   {$qtyIcon} {$p->name}{$badge} — Qty: {$p->quantity} — Colors: {$colorAttr}");
-    }
+            $this->command->info("   {$qtyIcon} {$p->name}{$badge} — Qty: {$p->quantity} — Colors: {$colorAttr}");
+        }
 
-    // ─────────────────────────────────────────────
-    // 6. WARM DASHBOARD CACHE
-    // ─────────────────────────────────────────────
-    $this->command->info('');
-    $this->command->info('♨️  Warming dashboard cache...');
-    try {
-        Artisan::call('dashboard:warm-cache', ['--force' => true]);
-        $this->command->info('   ✓ Dashboard cache warmed');
-    } catch (\Throwable $e) {
-        $this->command->warn('   ⚠ Cache warm skipped: ' . $e->getMessage());
+        // ─────────────────────────────────────────────
+        // 6. WARM DASHBOARD CACHE
+        // ─────────────────────────────────────────────
+        $this->command->info('');
+        $this->command->info('♨️  Warming dashboard cache...');
+        try {
+            Artisan::call('dashboard:warm-cache', ['--force' => true]);
+            $this->command->info('   ✓ Dashboard cache warmed');
+        } catch (\Throwable $e) {
+            $this->command->warn('   ⚠ Cache warm skipped: ' . $e->getMessage());
+        }
     }
-}
 }

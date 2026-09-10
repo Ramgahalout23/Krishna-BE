@@ -14,7 +14,7 @@ class PageSeeder extends Seeder
             $this->command->info('📄 Seeding CMS pages with sample templates...');
         }
 
-        $storeName = 'THREVOLT';
+        $storeName = 'dotoydo';
         try {
             $val = Setting::where('module', 'SITE')->where('key', 'storeName')->value('value');
             if ($val) $storeName = $val;
@@ -22,18 +22,15 @@ class PageSeeder extends Seeder
             // Settings table may not exist yet
         }
 
-        $baseUrl = url('/');
-
         // ─── 1. About Us ───────────────────────────────────────────
         Page::firstOrCreate(
             ['slug' => 'about'],
             [
                 'title' => 'About Us',
                 'content' => '
-<div class="page-sections">W3siaWQiOjEsInR5cGUiOiJoZXJvIiwiX3N0eWxlcyI6eyJiZ0NvbG9yIjoiIiwicGFkZGluZyI6Im1lZGl1bSJ9LCJ0aXRsZSI6IldlbGNvbWUgdG8gJyAuICRzdG9yZU5hbWUgLiAnIiwiY2FudGVudCI6IiIsImN0YV90ZXh0IjoiU2hvcCBOb3ciLCJjdGFfbGluayI6Ii9wcm9kdWN0cyJ9LHsiaWQiOjIsInR5cGUiOiJ0d29Db2x1bW4iLCJfc3R5bGVzIjp7ImJnQ29sb3IiOiIjZmFmYWZhIiwicGFkZGluZyI6Im1lZGl1bSJ9LCJ0aXRsZSI6Ik91ciBTdG9yeSIsImxlZnRDb250ZW50IjoiPHA+JyAuICRzdG9yZU5hbWUgLiAnIHN0YXJ0ZWQgd2l0aCBhIHNpbXBsZSBtaXNzaW9uIOKAlCBjcmVhdGUgdC1zaGlydHMgdGhhdCBtYWtlIGEgc3RhdGVtZW50LiBGcm9tIG91ciBmaXJzdCBkZXNpZ24gdG8gb3VyIGxhdGVzdCBjb2xsZWN0aW9uLCBldmVyeSBwaWVjZSBpcyBjcmFmdGVkIHdpdGggcHJlY2lzaW9uLCBjYXJlLCBhbmQgYW4gdW5hcG9sb2dldGljIGF0dGVudGlvbiB0byBkZXRhaWwuPC9wPjxwPldlIGJlbGlldmUgZmFzaGlvbiBzaG91bGQgYmUgYm9sZCwgdW5hcG9sb2dldGljYWwsIGFuZCBhY2Nlc3NpYmxlLiBPdXIgZGVzaWducyBhcmUgaW5zcGlyZWQgYnkgdGhlIGVuZXJneSBvZiBpbmRpYXnigJlzIHN0cmVldHMsIHRoZSByaWNoIGhlcml0YWdlIG9mIG91ciBjdWx0dXJlLCBhbmQgdGhlIGZvcncgY2xvdGhpbmcgdHJlbmRzIG9mIHRoZSBnbG9iYWwgc3RhZ2UuPC9wPiIsImltYWdlIjoiIn0seyJpZCI6MywidHlwZSI6ImZlYXR1cmVzIiwiX3N0eWxlcyI6eyJiZ0NvbG9yIjoiIiwicGFkZGluZyI6Im1lZGl1bSJ9LCJ0aXRsZSI6IldoeSBDaG9vc2UgVXM/Iiwic3VidGl0bGUiOiIiLCJmZWF0dXJlcyI6IlByZW1pdW0gUXVhbGl0eSBNYXRlcmlhbHNcbkJvbGQgJiBVbmlxdWUgRGVzaWduc1xuMTAwJSBTYXRpc2ZhY3Rpb24gR3VhcmFudGVlXG5GcmVlIFNoaXBwaW5nIG9uIE9yZGVycyDigLkg4oK5NDk5XG5FYXN5IDctRGF5IFJldHVybnMifSx7ImlkIjo0LCJ0eXBlIjoic3RhdHMiLCJfc3R5bGVzIjp7ImJnQ29sb3IiOiIjMWEyYTJlIiwicGFkZGluZyI6Im1lZGl1bSJ9LCJ0aXRsZSI6Ik91ciBKb3VybmV5IEJ5IFRoZSBOdW1iZXJzIiwic3RhdHMiOiJbe1wibnVtYmVyXCI6XCI1MCs1MDBcIixcImxhYmVsXCI6XCJUb3RhbCBDdXN0b21lcnNcIn0se1wibnVtYmVyXCI6XCIxMCswS1wiLFwibGFiZWxcIjpcIlByb2R1Y3RzIFNvbGRcIn0se1wibnVtYmVyXCI6XCI1MCswS1wiLFwibGFiZWxcIjpcIk9yZGVycyBEZWxpdmVyZWRcIn0se1wibnVtYmVyXCI6XCI0LjhcXHUyNjAxXCIsXCJsYWJlbFwiOlwiQXZlcmFnZSBSYXRpbmdcIn1dIn1d</div>
 <h1 style="font-size:56px;font-weight:800;text-align:center;padding:100px 20px 20px;background:linear-gradient(135deg,#1a1a1a,#333);color:#fff;margin:0">Welcome to ' . $storeName . '</h1>
 <p style="text-align:center;font-size:20px;color:rgba(255,255,255,0.9);padding:0 20px 60px;background:linear-gradient(135deg,#1a1a1a,#333);margin:0">
-    India&#039;s boldest streetwear brand — premium quality, fearless designs.
+    Your everyday mart — toys, electronics, home & more, all under one roof.
 </p>
 <div style="text-align:center;padding-bottom:60px;background:linear-gradient(135deg,#1a1a1a,#333)">
     <a href="/products" style="display:inline-block;background:#fff;color:#1a1a1a;padding:14px 40px;border-radius:8px;font-weight:700;text-decoration:none">Shop Now</a>
@@ -42,20 +39,20 @@ class PageSeeder extends Seeder
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center">
         <div>
             <h2 style="font-size:42px;font-weight:700;margin:0 0 30px;color:#1a1a2e">Our Story</h2>
-            <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">' . $storeName . ' started with a simple mission — create t-shirts that make a statement. From our first design to our latest collection, every piece is crafted with precision, care, and an unapologetic attention to detail.</p>
-            <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0">We believe fashion should be bold, unapologetic, and accessible. Our designs are inspired by the energy of india&#039;s streets, the rich heritage of our culture, and the forward-thinking trends of the global stage.</p>
+            <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">' . $storeName . ' started with a simple idea — bring together everything a family needs every day: toys that spark joy, gadgets that make life easier, and home essentials you can trust. From our first shelf to our growing catalog, every product is chosen with care, quality-checked, and priced honestly.</p>
+            <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0">We believe shopping should be simple, safe, and a little bit fun. That is why we curate trusted brands, keep prices fair, and make sure returns are painless — because happy customers (and happy kids) are what keep us going.</p>
         </div>
-        <div style="background:#e5e5ea;border-radius:12px;height:400px;display:flex;align-items:center;justify-content:center;font-size:80px">👕</div>
+        <div style="background:#e5e5ea;border-radius:12px;height:400px;display:flex;align-items:center;justify-content:center;font-size:80px">🧸</div>
     </div>
 </section>
 <section style="padding:80px 40px;background:linear-gradient(135deg,#fafafa,#f0f0f5)">
     <div style="max-width:1200px;margin:0 auto">
         <h2 style="font-size:42px;font-weight:700;text-align:center;margin:0 0 50px;color:#1a1a2e">Why Choose Us?</h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:30px">
-            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">✨ Premium Quality Materials</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">100% premium combed cotton with 240 GSM — ultra-soft, durable, and built to last.</p></div>
-            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">✨ Bold & Unique Designs</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">Exclusive graphic prints curated by our in-house design team. You won\'t find these anywhere else.</p></div>
-            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">✨ 100% Satisfaction Guarantee</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">Love your purchase or return it within 7 days — no questions asked.</p></div>
-            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">✨ Free Shipping on Orders ₹499+</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">Free shipping across India. Easy 7-day returns with free pickup.</p></div>
+            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">🧸 Curated for Families</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">Toys and everyday products selected for quality, safety, and real value — for kids and grown-ups alike.</p></div>
+            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">✨ Quality Checked</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">Every product passes a quality and safety check before it reaches your doorstep.</p></div>
+            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">↩️ Easy Returns</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">Not right for you? Return it within 7 days — no questions asked.</p></div>
+            <div style="background:#fff;padding:40px 30px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #1a1a1a"><h3 style="font-size:20px;font-weight:600;margin:0 0 15px;color:#1a1a2e">🚚 Free Shipping ₹499+</h3><p style="color:#8a8a9a;margin:0;line-height:1.6">Free shipping across India with fast delivery and easy 7-day returns.</p></div>
         </div>
     </div>
 </section>
@@ -71,7 +68,7 @@ class PageSeeder extends Seeder
     </div>
 </section>',
                 'meta_title' => "About {$storeName}",
-                'meta_description' => "Learn about {$storeName} — India's boldest streetwear brand. Premium quality t-shirts, fearless designs, and 100% satisfaction guaranteed.",
+                'meta_description' => "Learn about {$storeName} — your everyday mart for toys, electronics, home & more. Quality products, fair prices, and easy returns.",
                 'is_published' => true,
             ]
         );
@@ -94,7 +91,7 @@ class PageSeeder extends Seeder
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">4. Your Rights</h2>
 <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">You have the right to access, update, or delete your personal information at any time. You can do this through your account settings or by contacting our support team.</p>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">5. Contact</h2>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">For privacy-related inquiries, please email us at support@threvolt.com or contact us through our support page.</p>',
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">For privacy-related inquiries, please email us at support@dotoydo.com or contact us through our support page.</p>',
                 'meta_title' => "Privacy Policy - {$storeName}",
                 'meta_description' => "{$storeName} Privacy Policy. Learn how we collect, use, and protect your personal information.",
                 'is_published' => true,
@@ -108,26 +105,26 @@ class PageSeeder extends Seeder
                 'title' => 'Return & Exchange Policy',
                 'content' => '
 <h1 style="font-size:42px;font-weight:700;margin:0 0 10px;color:#1a1a2e">Return & Exchange Policy</h1>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 30px">We want you to love your purchase. If something isn\&#039;t right, we\&#039;re here to help.</p>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 30px">We want you to love your purchase. If something is not right, we are here to help.</p>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:0 0 40px">
     <div style="background:#f0fdf4;padding:30px;border-radius:12px;text-align:center"><div style="font-size:36px;margin:0 0 10px">🔄</div><div style="font-size:18px;font-weight:700;color:#166534">7-Day Returns</div><div style="font-size:14px;color:#166534;opacity:0.8">Return within 7 days of delivery</div></div>
     <div style="background:#eff6ff;padding:30px;border-radius:12px;text-align:center"><div style="font-size:36px;margin:0 0 10px">🚚</div><div style="font-size:18px;font-weight:700;color:#1e40af">Free Pickup</div><div style="font-size:14px;color:#1e40af;opacity:0.8">We pick up the item for free</div></div>
     <div style="background:#fef3c7;padding:30px;border-radius:12px;text-align:center"><div style="font-size:36px;margin:0 0 10px">💰</div><div style="font-size:18px;font-weight:700;color:#92400e">100% Refund</div><div style="font-size:14px;color:#92400e;opacity:0.8">Full refund to original payment</div></div>
 </div>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">Eligibility</h2>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">Items must be unused, unwashed, and in original condition with tags attached. Returns are accepted within 7 days of delivery.</p>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">Items must be unused and in their original packaging with all accessories intact. Returns are accepted within 7 days of delivery.</p>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">How to Return</h2>
 <ol style="font-size:16px;line-height:2;color:#4a4a5a;padding-left:20px">
     <li>Log in to your account and go to Orders</li>
     <li>Select the item you want to return</li>
     <li>Choose a reason and submit the return request</li>
     <li>Schedule a free pickup or drop off at your nearest courier</li>
-    <li>We\'ll process your refund within 5-7 business days after receiving the item</li>
+    <li>We will process your refund within 5-7 business days after receiving the item</li>
 </ol>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">Exchanges</h2>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">For size exchanges, simply place a new order and return the original item for a full refund. This ensures faster processing and availability of your preferred size.</p>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">For an exchange, simply place a new order and return the original item for a full refund. This ensures faster processing and availability of your preferred variant.</p>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">Non-Returnable Items</h2>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">Due to hygiene reasons, innerwear, socks, and masks cannot be returned unless there is a manufacturing defect.</p>',
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">For safety and hygiene reasons, items that are opened from their sealed packaging, used, or show signs of damage caused by the buyer cannot be returned unless they have a manufacturing defect.</p>',
                 'meta_title' => "Return Policy - {$storeName}",
                 'meta_description' => "Easy returns and exchanges at {$storeName}. 7-day return policy with free pickup. Full refund guaranteed.",
                 'is_published' => true,
@@ -141,12 +138,12 @@ class PageSeeder extends Seeder
                 'title' => 'Contact Us',
                 'content' => '
 <h1 style="font-size:42px;font-weight:700;margin:0 0 10px;color:#1a1a2e">Contact Us</h1>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 40px">We\'d love to hear from you! Choose your preferred way to reach us.</p>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 40px">We would love to hear from you! Choose your preferred way to reach us.</p>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin:0 0 40px">
     <div style="background:#fafafa;padding:30px;border-radius:12px;border:1px solid #e5e5ea;text-align:center">
         <div style="font-size:36px;margin:0 0 15px">📧</div>
         <h3 style="font-size:18px;font-weight:700;margin:0 0 5px;color:#1a1a2e">Email</h3>
-        <p style="font-size:14px;color:#4a4a5a;margin:0"><a href="mailto:support@threvolt.com" style="color:#1a1a1a;text-decoration:underline">support@threvolt.com</a></p>
+        <p style="font-size:14px;color:#4a4a5a;margin:0"><a href="mailto:support@dotoydo.com" style="color:#1a1a1a;text-decoration:underline">support@dotoydo.com</a></p>
     </div>
     <div style="background:#fafafa;padding:30px;border-radius:12px;border:1px solid #e5e5ea;text-align:center">
         <div style="font-size:36px;margin:0 0 15px">📞</div>
@@ -167,11 +164,11 @@ class PageSeeder extends Seeder
 </details>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
     <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">What is your return policy?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">We offer a 7-day return policy with free pickup. Items must be unworn with tags attached.</p>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">We offer a 7-day return policy with free pickup. Items must be unused and in original packaging.</p>
 </details>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
-    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">Do you ship internationally?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Currently we ship within India only. International shipping coming soon!</p>
+    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">Are the toys safe for children?</summary>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">All toys are quality checked and come with age guidance on the product page. Adult supervision is recommended for small parts.</p>
 </details>',
                 'meta_title' => "Contact Us - {$storeName}",
                 'meta_description' => "Get in touch with {$storeName}. Email, phone, and address information for customer support.",
@@ -194,8 +191,8 @@ class PageSeeder extends Seeder
 <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">All orders are subject to availability and price confirmation. We accept payment via Razorpay (credit/debit cards, UPI, net banking) and Cash on Delivery. Prices are in INR and inclusive of applicable taxes.</p>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">3. Shipping & Delivery</h2>
 <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">We ship across India using trusted courier partners. Estimated delivery times are 3-7 business days. Free shipping is available on orders above ₹499.</p>
-<h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">4. Intellectual Property</h2>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">All content on this website including designs, graphics, text, and logos are the exclusive property of ' . $storeName . ' and protected by applicable intellectual property laws.</p>
+<h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">4. Product Safety</h2>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">Toys and products with small parts include age guidance and safety warnings. Keep products away from children under the recommended age unless supervised by an adult.</p>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">5. Limitation of Liability</h2>
 <p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 20px">' . $storeName . ' shall not be liable for any indirect, incidental, or consequential damages arising from the use of our products or services.</p>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 15px;color:#1a1a2e">6. Governing Law</h2>
@@ -260,29 +257,29 @@ class PageSeeder extends Seeder
 <h2 style="font-size:20px;font-weight:700;margin:30px 0 20px;padding-bottom:10px;border-bottom:2px solid #1a1a1a;color:#1a1a2e">🛒 Orders</h2>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
     <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">How do I place an order?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Simply browse our products, select your size and color, add items to your cart, and proceed to checkout. You can checkout as a guest or create an account for faster future purchases.</p>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Simply browse our products, pick your preferred color or variant, add items to your cart, and proceed to checkout. You can checkout as a guest or create an account for faster future purchases.</p>
 </details>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
     <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">Can I cancel my order?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Yes, orders can be cancelled within 24 hours of placement if they haven\'t been shipped yet. Contact our support team or cancel from your account dashboard.</p>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Yes, orders can be cancelled within 24 hours of placement if they have not been shipped yet. Contact our support team or cancel from your account dashboard.</p>
 </details>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
     <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">What payment methods do you accept?</summary>
     <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">We accept credit/debit cards, UPI, net banking, and Cash on Delivery (COD) — all powered by Razorpay for secure transactions.</p>
 </details>
 
-<h2 style="font-size:20px;font-weight:700;margin:30px 0 20px;padding-bottom:10px;border-bottom:2px solid #1a1a1a;color:#1a1a2e">👕 Products</h2>
+<h2 style="font-size:20px;font-weight:700;margin:30px 0 20px;padding-bottom:10px;border-bottom:2px solid #1a1a1a;color:#1a1a2e">🧸 Products</h2>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
-    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">What fabric do you use?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Our t-shirts are made from 100% premium combed cotton with 240 GSM weight — ensuring durability, softness, and comfort. Each tee is pre-shrunk to maintain its fit wash after wash.</p>
+    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">Are your toys safe and quality checked?</summary>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Yes. Every toy and product is quality checked for safety and durability. Products with small parts include clear age guidance, and we recommend adult supervision for young children.</p>
 </details>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
-    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">How do I find my size?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Check our Size Guide page for detailed measurements. As a general rule, our tees run true to size with a regular fit. If you prefer an oversized look, we recommend going one size up.</p>
+    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">How do I choose the right size or variant?</summary>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Each product page lists available colors and variants. For toys, check the age guidance on the product page. If you are unsure, message us on chat and we will help you pick.</p>
 </details>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
-    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">How should I care for my t-shirts?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Machine wash cold with similar colors. Do not bleach. Tumble dry low or hang dry. Iron on low heat. Avoid fabric softeners to maintain print quality.</p>
+    <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">How do I care for my products?</summary>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Check the care instructions included with your product. Keep electronics away from water, clean soft toys gently, and store items in a cool, dry place.</p>
 </details>
 
 <h2 style="font-size:20px;font-weight:700;margin:30px 0 20px;padding-bottom:10px;border-bottom:2px solid #1a1a1a;color:#1a1a2e">🚚 Shipping & Returns</h2>
@@ -292,7 +289,7 @@ class PageSeeder extends Seeder
 </details>
 <details style="margin-bottom:15px;border:1px solid #e5e5ea;border-radius:8px;padding:20px;background:#fafafa">
     <summary style="font-weight:600;cursor:pointer;font-size:16px;color:#1a1a2e">How do I return a product?</summary>
-    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Log into your account, go to Orders, select the item, and initiate a return. We\'ll arrange a free pickup within 2-3 days. Refunds are processed within 5-7 business days of receiving the return.</p>
+    <p style="margin-top:15px;color:#4a4a5a;line-height:1.6">Log into your account, go to Orders, select the item, and initiate a return. We will arrange a free pickup within 2-3 days. Refunds are processed within 5-7 business days of receiving the return.</p>
 </details>',
                 'meta_title' => "FAQ - {$storeName}",
                 'meta_description' => "Frequently asked questions about {$storeName} — orders, products, shipping, returns, and more.",
@@ -300,53 +297,48 @@ class PageSeeder extends Seeder
             ]
         );
 
-        // ─── 8. Size Guide ───────────────────────────────────────
+        // ─── 8. Size & Age Guide ────────────────────────────────
         Page::firstOrCreate(
             ['slug' => 'size-guide'],
             [
-                'title' => 'Size Guide',
+                'title' => 'Size & Age Guide',
                 'content' => '
-<h1 style="font-size:42px;font-weight:700;margin:0 0 10px;color:#1a1a2e">Size Guide</h1>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 30px">Find your perfect fit with our detailed size chart. Measurements are in inches.</p>
-<p style="background:#fef3c7;padding:15px 20px;border-radius:8px;font-size:14px;color:#92400e;margin:0 0 40px"><strong>💡 Pro Tip:</strong> If you\'re between sizes or prefer an oversized fit, we recommend going one size up. Our tees have a regular fit — for a relaxed look, size up.</p>
+<h1 style="font-size:42px;font-weight:700;margin:0 0 10px;color:#1a1a2e">Size & Age Guide</h1>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 30px">A quick guide to help you choose the right products. Age guidance on toys is based on safety, complexity, and suitability — it is not a measure of intelligence or skill.</p>
 <div style="overflow-x:auto;margin:0 0 40px">
     <table style="width:100%;border-collapse:collapse;font-size:15px">
         <thead>
             <tr style="background:#1a1a1a;color:#fff">
-                <th style="padding:12px 20px;text-align:left">Size</th>
-                <th style="padding:12px 20px;text-align:left">Chest (inches)</th>
-                <th style="padding:12px 20px;text-align:left">Length (inches)</th>
-                <th style="padding:12px 20px;text-align:left">Shoulder (inches)</th>
-                <th style="padding:12px 20px;text-align:left">Sleeve (inches)</th>
+                <th style="padding:12px 20px;text-align:left">Age Group</th>
+                <th style="padding:12px 20px;text-align:left">Great For</th>
             </tr>
         </thead>
         <tbody>
-            <tr style="border-bottom:1px solid #e5e5ea"><td style="padding:12px 20px;font-weight:700">S</td><td style="padding:12px 20px">36-38</td><td style="padding:12px 20px">27</td><td style="padding:12px 20px">16</td><td style="padding:12px 20px">8</td></tr>
-            <tr style="border-bottom:1px solid #e5e5ea;background:#fafafa"><td style="padding:12px 20px;font-weight:700">M</td><td style="padding:12px 20px">38-40</td><td style="padding:12px 20px">28</td><td style="padding:12px 20px">17</td><td style="padding:12px 20px">8.5</td></tr>
-            <tr style="border-bottom:1px solid #e5e5ea"><td style="padding:12px 20px;font-weight:700">L</td><td style="padding:12px 20px">40-42</td><td style="padding:12px 20px">29</td><td style="padding:12px 20px">18</td><td style="padding:12px 20px">9</td></tr>
-            <tr style="border-bottom:1px solid #e5e5ea;background:#fafafa"><td style="padding:12px 20px;font-weight:700">XL</td><td style="padding:12px 20px">42-44</td><td style="padding:12px 20px">30</td><td style="padding:12px 20px">19</td><td style="padding:12px 20px">9.5</td></tr>
-            <tr style="border-bottom:1px solid #e5e5ea"><td style="padding:12px 20px;font-weight:700">XXL</td><td style="padding:12px 20px">44-46</td><td style="padding:12px 20px">31</td><td style="padding:12px 20px">20</td><td style="padding:12px 20px">10</td></tr>
-            <tr style="border-bottom:1px solid #e5e5ea;background:#fafafa"><td style="padding:12px 20px;font-weight:700">3XL</td><td style="padding:12px 20px">46-48</td><td style="padding:12px 20px">32</td><td style="padding:12px 20px">21</td><td style="padding:12px 20px">10.5</td></tr>
+            <tr style="border-bottom:1px solid #e5e5ea"><td style="padding:12px 20px;font-weight:700">0-2 Years</td><td style="padding:12px 20px">Soft plush toys, sensory toys, rattles & teethers</td></tr>
+            <tr style="border-bottom:1px solid #e5e5ea;background:#fafafa"><td style="padding:12px 20px;font-weight:700">3-5 Years</td><td style="padding:12px 20px">Building blocks, simple puzzles, musical toys, pretend play</td></tr>
+            <tr style="border-bottom:1px solid #e5e5ea"><td style="padding:12px 20px;font-weight:700">6-8 Years</td><td style="padding:12px 20px">Board games, science kits, action figures, ride-ons</td></tr>
+            <tr style="border-bottom:1px solid #e5e5ea;background:#fafafa"><td style="padding:12px 20px;font-weight:700">9-12 Years</td><td style="padding:12px 20px">RC vehicles, strategy games, construction sets, puzzles</td></tr>
+            <tr style="border-bottom:1px solid #e5e5ea"><td style="padding:12px 20px;font-weight:700">Teens & Adults</td><td style="padding:12px 20px">Collectibles, speed cubes, sports gear, electronics</td></tr>
         </tbody>
     </table>
 </div>
-<h2 style="font-size:24px;font-weight:700;margin:40px 0 20px;color:#1a1a2e">How to Measure</h2>
+<h2 style="font-size:24px;font-weight:700;margin:40px 0 20px;color:#1a1a2e">Small Parts Warning</h2>
+<div style="background:#fef3c7;padding:20px;border-radius:12px;border:1px solid #fde68a;margin:0 0 20px">
+    <p style="font-size:14px;color:#92400e;margin:0;line-height:1.6"><strong>⚠️ Safety First:</strong> Toys with small parts can be a choking hazard for children under 3 years. Always check the age label on each product and supervise younger children during play.</p>
+</div>
+<h2 style="font-size:24px;font-weight:700;margin:40px 0 20px;color:#1a1a2e">Electronics & Wearables Sizing</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px">
     <div style="background:#fafafa;padding:20px;border-radius:12px;border:1px solid #e5e5ea">
-        <h3 style="font-size:16px;font-weight:700;margin:0 0 10px;color:#1a1a2e">📏 Chest</h3>
-        <p style="font-size:14px;color:#4a4a5a;margin:0;line-height:1.6">Measure around the fullest part of your chest, keeping the measuring tape under your arms and parallel to the floor.</p>
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 10px;color:#1a1a2e">⌚ Smart Bands</h3>
+        <p style="font-size:14px;color:#4a4a5a;margin:0;line-height:1.6">Straps are adjustable and fit most wrists (approx. 140-220 mm).</p>
     </div>
     <div style="background:#fafafa;padding:20px;border-radius:12px;border:1px solid #e5e5ea">
-        <h3 style="font-size:16px;font-weight:700;margin:0 0 10px;color:#1a1a2e">📏 Length</h3>
-        <p style="font-size:14px;color:#4a4a5a;margin:0;line-height:1.6">Measure from the highest point of the shoulder down to the bottom hem of the t-shirt.</p>
-    </div>
-    <div style="background:#fafafa;padding:20px;border-radius:12px;border:1px solid #e5e5ea">
-        <h3 style="font-size:16px;font-weight:700;margin:0 0 10px;color:#1a1a2e">📏 Shoulder</h3>
-        <p style="font-size:14px;color:#4a4a5a;margin:0;line-height:1.6">Measure from the edge of one shoulder to the edge of the other shoulder across the back.</p>
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 10px;color:#1a1a2e">🛏️ Bedding</h3>
+        <p style="font-size:14px;color:#4a4a5a;margin:0;line-height:1.6">Bedding sets list the bed size (Single, Queen, King). Measure your mattress before ordering.</p>
     </div>
 </div>',
-                'meta_title' => "Size Guide - {$storeName}",
-                'meta_description' => "Find your perfect fit with {$storeName}'s detailed size chart. Chest, length, shoulder, and sleeve measurements for all sizes S-3XL.",
+                'meta_title' => "Size & Age Guide - {$storeName}",
+                'meta_description' => "Find the right fit with {$storeName}'s size & age guide. Toy age guidance, small parts safety, and sizing for smart bands and bedding.",
                 'is_published' => true,
             ]
         );
@@ -358,42 +350,38 @@ class PageSeeder extends Seeder
                 'title' => 'Care Instructions',
                 'content' => '
 <h1 style="font-size:42px;font-weight:700;margin:0 0 10px;color:#1a1a2e">Care Instructions</h1>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 30px">Make your ' . $storeName . ' t-shirts last longer with proper care. Follow these simple guidelines.</p>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 30px">Make your ' . $storeName . ' products last longer with a little care. Follow these simple guidelines.</p>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin:0 0 40px">
     <div style="background:#f0fdf4;padding:25px;border-radius:12px;border:1px solid #bbf7d0;text-align:center">
-        <div style="font-size:36px;margin:0 0 10px">🧺</div>
-        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#166534">Machine Wash Cold</h3>
-        <p style="font-size:13px;color:#166534;line-height:1.5">Wash with cold water to preserve color and print quality</p>
-    </div>
-    <div style="background:#fef3c7;padding:25px;border-radius:12px;border:1px solid #fde68a;text-align:center">
-        <div style="font-size:36px;margin:0 0 10px">☀️</div>
-        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#92400e">Hang Dry</h3>
-        <p style="font-size:13px;color:#92400e;line-height:1.5">Avoid high heat — hang dry or tumble dry on low</p>
+        <div style="font-size:36px;margin:0 0 10px">🧸</div>
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#166534">Soft Toys & Plush</h3>
+        <p style="font-size:13px;color:#166534;line-height:1.5">Spot clean or gentle machine wash in a laundry bag on a cold cycle. Air dry fully.</p>
     </div>
     <div style="background:#eff6ff;padding:25px;border-radius:12px;border:1px solid #bfdbfe;text-align:center">
-        <div style="font-size:36px;margin:0 0 10px">🚫</div>
-        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#1e40af">No Bleach</h3>
-        <p style="font-size:13px;color:#1e40af;line-height:1.5">Never use bleach or harsh chemicals on your tees</p>
+        <div style="font-size:36px;margin:0 0 10px">🔋</div>
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#1e40af">Electronics & Gadgets</h3>
+        <p style="font-size:13px;color:#1e40af;line-height:1.5">Keep away from water and extreme heat. Charge with the included cable only.</p>
+    </div>
+    <div style="background:#fef3c7;padding:25px;border-radius:12px;border:1px solid #fde68a;text-align:center">
+        <div style="font-size:36px;margin:0 0 10px">🍳</div>
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#92400e">Cookware & Kitchen</h3>
+        <p style="font-size:13px;color:#92400e;line-height:1.5">Use wooden or silicone utensils on non-stick surfaces. Hand wash for best results.</p>
     </div>
     <div style="background:#fef2f2;padding:25px;border-radius:12px;border:1px solid #fecaca;text-align:center">
-        <div style="font-size:36px;margin:0 0 10px">🔲</div>
-        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#991b1b">Iron Inside Out</h3>
-        <p style="font-size:13px;color:#991b1b;line-height:1.5">Iron on low heat, inside out to protect the print</p>
+        <div style="font-size:36px;margin:0 0 10px">🛏️</div>
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 5px;color:#991b1b">Bedding & Linen</h3>
+        <p style="font-size:13px;color:#991b1b;line-height:1.5">Machine wash separately on a gentle cycle. Avoid bleach and high-heat drying.</p>
     </div>
 </div>
 <h2 style="font-size:24px;font-weight:700;margin:40px 0 20px;color:#1a1a2e">Detailed Care Guide</h2>
-<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Pre-Wash</h3>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">Always turn your t-shirts inside out before washing. This protects the print and reduces friction on the outer fabric.</p>
-<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Washing</h3>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">Machine wash with cold water (30°C or below) using a mild detergent. Wash with similar colors to prevent color transfer. Avoid fabric softeners as they can damage the fabric fibers and print quality.</p>
-<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Drying</h3>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">Hang drying is best for longevity. If using a dryer, select low heat settings. High heat can cause shrinkage and damage the print. Remove from dryer while slightly damp to reduce wrinkles.</p>
-<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Ironing</h3>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">Iron on low to medium heat. Always iron inside out and avoid ironing directly over printed areas. For stubborn wrinkles, use a steaming function instead.</p>
-<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Storage</h3>
-<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">Fold your t-shirts instead of hanging to maintain shape. Store in a cool, dry place away from direct sunlight to prevent fading.</p>',
+<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Toys with Batteries</h3>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">Remove batteries when the toy is not in use for a long time. Never mix old and new batteries, and replace the battery cover securely after every change.</p>
+<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Cleaning Soft Surfaces</h3>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">For plush toys and cushions, vacuum regularly and spot clean with mild soap. Machine wash only if the care tag allows it, using a cold gentle cycle.</p>
+<h3 style="font-size:18px;font-weight:600;margin:25px 0 10px;color:#1a1a2e">Storing Your Products</h3>
+<p style="font-size:16px;line-height:1.8;color:#4a4a5a;margin:0 0 15px">Store toys and gadgets in a cool, dry place away from direct sunlight. Keep small parts and batteries out of reach of young children when not in use.</p>',
                 'meta_title' => "Care Instructions - {$storeName}",
-                'meta_description' => "Learn how to care for your {$storeName} t-shirts. Washing, drying, ironing, and storage tips to make your tees last longer.",
+                'meta_description' => "Learn how to care for your {$storeName} products. Cleaning, storage, and battery safety tips for toys, electronics, and home essentials.",
                 'is_published' => true,
             ]
         );

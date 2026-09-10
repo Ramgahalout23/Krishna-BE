@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
         RobotsTxt::truncate();
         CuratedLook::truncate();
         Reel::truncate();
-        User::where('email', '!=', 'admin@threvolt.com')->delete();
+        User::where('email', '!=', 'admin@dotoydo.com')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $this->command->info('🗑️  Existing data cleared');
@@ -120,8 +120,8 @@ class DatabaseSeeder extends Seeder
         // =====================
         $this->command->info("\n🎉 Database seeding completed successfully!\n");
         $this->command->info("📊 Summary:");
-        $this->command->info("- Admin: admin@threvolt.com / Admin@123");
-        $this->command->info("- Customer: customer@threvolt.com / Demo@123");
+        $this->command->info("- Admin: admin@dotoydo.com / Admin@123");
+        $this->command->info("- Customer: customer@dotoydo.com / Demo@123");
         $this->command->info("- Products: " . Product::count());
         $this->command->info("- Orders: " . Order::count());
         $this->command->info("- Coupons: " . Coupon::count());

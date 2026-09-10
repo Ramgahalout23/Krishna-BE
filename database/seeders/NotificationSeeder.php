@@ -14,7 +14,7 @@ class NotificationSeeder extends Seeder
     {
         $this->command->info('🔔 Seeding notifications...');
 
-        $storeName = 'THREVOLT';
+        $storeName = 'dotoydo';
         try {
             $val = Setting::where('module', 'SITE')->where('key', 'storeName')->value('value');
             if ($val) $storeName = $val;

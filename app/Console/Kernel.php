@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // ── Backup Scheduler ──
-        $schedule->command('backup:run')->everyMinute();
+        $schedule->command('backup:run')->hourly();
 
         // ── Ad Campaign Scheduler ──
         $schedule->command('ads:process-scheduled')->hourly();
@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('campaigns:process-scheduled')->everyFiveMinutes();
 
         // ── Maintenance Schedule Check ──
-        $schedule->command('maintenance:check-schedule')->everyMinute();
+        $schedule->command('maintenance:check-schedule')->everyFiveMinutes();
 
         // ── Daily Analytics Aggregation ──
         // Aggregate today's metrics into the summary table every night at 23:55

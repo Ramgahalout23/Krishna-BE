@@ -18,7 +18,7 @@ class TranslationSeeder extends Seeder
     const DEFAULT_TRANSLATIONS = [
         // Navigation
         'nav.home' => 'Home',
-        'nav.products' => 'All T-Shirts',
+        'nav.products' => 'All Products',
         'nav.sales' => 'Sales',
         'nav.wishlist' => 'Wishlist',
         'nav.cart' => 'Cart',
@@ -39,7 +39,7 @@ class TranslationSeeder extends Seeder
         'mobile.cart' => 'Cart',
 
         // Search
-        'search.placeholder' => 'Search t-shirts...',
+        'search.placeholder' => 'Search toys, gadgets & more...',
 
         // Announcement bar
         'announcement.shipping' => 'Free Shipping on orders above',
@@ -236,7 +236,7 @@ class TranslationSeeder extends Seeder
         'cart.drawer.items' => '{{count}} items',
         'cart.drawer.item' => '{{count}} item',
         'cart.drawer.empty_title' => 'Your bag is empty',
-        'cart.drawer.empty_desc' => 'Looks like you have not added any tees yet!',
+        'cart.drawer.empty_desc' => 'Looks like your cart is empty. Add something fun!',
         'cart.drawer.start_shopping' => 'Start Shopping 🛍️',
         'cart.drawer.out_of_stock' => 'Out of Stock',
         'cart.drawer.in_stock' => 'In Stock',
@@ -758,7 +758,7 @@ class TranslationSeeder extends Seeder
         'about.content_not_found' => 'Content not found',
         'about.go_home' => 'Go to Home',
         'about.ready_make_statement' => 'Ready to Make a Statement?',
-        'about.explore_collection' => 'Explore our latest collection and find your perfect tee.',
+        'about.explore_collection' => 'Explore toys, gadgets and home essentials — there is something for everyone at dotoydo.',
         'about.shop_now' => 'Shop Now',
 
         // Reviews

@@ -14,7 +14,7 @@ class SeoSeeder extends Seeder
     {
         $this->command->info('🔍 Seeding SEO data...');
 
-        $storeName = 'THREVOLT';
+        $storeName = 'dotoydo';
         try {
             $val = Setting::where('module', 'SITE')->where('key', 'storeName')->value('value');
             if ($val) $storeName = $val;
@@ -22,12 +22,12 @@ class SeoSeeder extends Seeder
 
         Seo::create([
             'entity_type' => 'HOME', 'entity_id' => 'home',
-            'meta_title' => "{$storeName} - India's Boldest T-Shirt Brand",
-            'meta_description' => 'Premium quality t-shirts with bold designs. Free shipping on orders above ₹499.',
-            'meta_keywords' => 't-shirts, oversize tees, graphic tees, streetwear',
+            'meta_title' => "{$storeName} - Your Everyday Mart | Toys, Electronics, Home & More",
+            'meta_description' => 'Shop toys & games, electronics, home and kitchen essentials and sports gear at dotoydo. Quality products, fast delivery, easy returns, free shipping above ₹499.',
+            'meta_keywords' => 'toys, games, toys online, buy toys india, electronics, home kitchen, mart, dotoydo',
         ]);
-        Sitemap::create(['url' => 'https://threvolt.com/sitemap.xml', 'last_modified' => now()]);
-        RobotsTxt::create(['content' => "User-agent: *\nAllow: /\nSitemap: https://threvolt.com/sitemap.xml"]);
+        Sitemap::create(['url' => 'https://dotoydo.com/sitemap.xml', 'last_modified' => now()]);
+        RobotsTxt::create(['content' => "User-agent: *\nAllow: /\nSitemap: https://dotoydo.com/sitemap.xml"]);
         $this->command->info('   ✓ SEO data created');
     }
 }

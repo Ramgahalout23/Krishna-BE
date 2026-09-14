@@ -83,7 +83,14 @@ class StorageDriverService
             $url = Storage::disk('s3')->url($storedPath);
         } else {
             // Local disk: return fully-qualified URL so all frontends and clients can directly render the image
-            $url = url('storage/' . ltrim($storedPath, '/'));
+            $baseUrl = config('app.url');
+            if (empty($baseUrl) || $baseUrl === 'http://localhost') {
+                $baseUrl = url('/');
+            }
+            if (app()->environment('production') || str_contains($baseUrl, 'dotoydo.com')) {
+                $baseUrl = preg_replace('/^http:\/\//i', 'https://', $baseUrl);
+            }
+            $url = rtrim($baseUrl, '/') . '/storage/' . ltrim($storedPath, '/');
         }
 
         return [
@@ -135,6 +142,13 @@ class StorageDriverService
         if ($disk === 's3') {
             return Storage::disk('s3')->url($filePath);
         }
-        return url('storage/' . ltrim($filePath, '/'));
+        $baseUrl = config('app.url');
+        if (empty($baseUrl) || $baseUrl === 'http://localhost') {
+            $baseUrl = url('/');
+        }
+        if (app()->environment('production') || str_contains($baseUrl, 'dotoydo.com')) {
+            $baseUrl = preg_replace('/^http:\/\//i', 'https://', $baseUrl);
+        }
+        return rtrim($baseUrl, '/') . '/storage/' . ltrim($filePath, '/');
     }
 }

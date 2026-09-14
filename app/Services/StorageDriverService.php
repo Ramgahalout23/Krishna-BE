@@ -24,12 +24,23 @@ class StorageDriverService
 
     /**
      * Get the active disk name based on the stored setting.
+     * Only returns 's3' if S3 credentials and bucket are configured in .env.
      */
     public function getActiveDisk(): string
     {
         $driver = Setting::where('key', self::SETTING_KEY)->value('value');
 
-        return $driver === 's3' ? 's3' : 'public';
+        if ($driver === 's3') {
+            $hasCredentials = !empty(config('filesystems.disks.s3.key'))
+                && !empty(config('filesystems.disks.s3.secret'))
+                && !empty(config('filesystems.disks.s3.bucket'));
+
+            if ($hasCredentials) {
+                return 's3';
+            }
+        }
+
+        return 'public';
     }
 
     /**
@@ -50,7 +61,22 @@ class StorageDriverService
     public function storeFile($file, string $path = 'uploads'): array
     {
         $disk = $this->getActiveDisk();
-        $storedPath = $file->store($path, $disk);
+        $storedPath = false;
+
+        try {
+            $storedPath = $file->store($path, $disk);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Upload to {$disk} failed, falling back to public disk: " . $e->getMessage());
+            if ($disk !== 'public') {
+                $disk = 'public';
+                $storedPath = $file->store($path, 'public');
+            }
+        }
+
+        if (!$storedPath && $disk !== 'public') {
+            $disk = 'public';
+            $storedPath = $file->store($path, 'public');
+        }
 
         if ($disk === 's3') {
             // S3 returns a full URL via Storage::url()

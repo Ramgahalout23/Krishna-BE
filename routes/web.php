@@ -42,6 +42,37 @@ Route::get('/{filename}.txt', function (string $filename) {
     abort(404);
 })->where('filename', '[a-zA-Z0-9\-]{8,128}');
 
+// ── Direct Storage File Serving (Fallback when symlink is absent on shared hosting) ──
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path("app/public/{$path}");
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        $fullPath = storage_path("app/{$path}");
+    }
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*');
+
+Route::get('/uploads/{path}', function (string $path) {
+    $fullPath = storage_path("app/public/uploads/{$path}");
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        $fullPath = storage_path("app/uploads/{$path}");
+    }
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*');
+
 // ── React SPA Entry Point ──
 // Serve the React app's index.html for all SPA routes so client-side
 // routing (react-router) handles navigation properly.

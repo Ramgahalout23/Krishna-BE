@@ -82,8 +82,8 @@ class StorageDriverService
             // S3 returns a full URL via Storage::url()
             $url = Storage::disk('s3')->url($storedPath);
         } else {
-            // Local disk returns a relative /storage/… path
-            $url = '/storage/' . $storedPath;
+            // Local disk: return fully-qualified URL so all frontends and clients can directly render the image
+            $url = url('storage/' . ltrim($storedPath, '/'));
         }
 
         return [
@@ -132,6 +132,9 @@ class StorageDriverService
     public function url(string $filePath): string
     {
         $disk = $this->getActiveDisk();
-        return Storage::disk($disk)->url($filePath);
+        if ($disk === 's3') {
+            return Storage::disk('s3')->url($filePath);
+        }
+        return url('storage/' . ltrim($filePath, '/'));
     }
 }

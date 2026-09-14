@@ -25,6 +25,7 @@ class TrackingRepository
                 'total' => PageView::count(),
                 'today' => PageView::whereDate('created_at', today())->count(),
                 'unique_urls' => PageView::distinct('url')->count('url'),
+                'unique_visitors' => PageView::distinct('session_id')->count('session_id'),
             ];
         });
     }
@@ -35,6 +36,54 @@ class TrackingRepository
             return UserSession::where('is_active', true)
                 ->where('start_time', '>=', now()->subHours(2))
                 ->count();
+        });
+    }
+
+    /**
+     * List the sessions considered "active" (same window as getActiveSessions()).
+     * Only the columns the admin table renders are selected to keep the payload small.
+     */
+    public function getActiveSessionList(int $limit = 25): array
+    {
+        return $this->cacheWithTracking('tracking_active_session_list_' . $limit, 60, function () use ($limit) {
+            return UserSession::where('is_active', true)
+                ->where('start_time', '>=', now()->subHours(2))
+                ->orderByDesc('start_time')
+                ->take($limit)
+                ->get([
+                    'id', 'session_id', 'user_id', 'page_views', 'duration',
+                    'device', 'browser', 'source', 'referrer', 'landing_page', 'start_time',
+                ])
+                ->toArray();
+        });
+    }
+
+    /**
+     * Aggregate session totals for the tracking dashboard KPIs.
+     * Returns session count, average duration (seconds) and bounce rate (%).
+     * A session is considered bounced when it recorded a single page view.
+     */
+    public function getSessionStats(?string $dateRange = null, ?string $startDate = null, ?string $endDate = null): array
+    {
+        $cacheKey = 'tracking_session_stats' . ($dateRange ? '_' . $dateRange : '');
+        if ($dateRange === 'custom') $cacheKey .= '_' . ($startDate ?? 'null') . '_' . ($endDate ?? 'null');
+
+        return $this->cacheWithTracking($cacheKey, 120, function () use ($dateRange, $startDate, $endDate) {
+            $query = UserSession::query();
+            $this->applyDateRange($query, $dateRange, $startDate, $endDate);
+
+            $totals = (clone $query)
+                ->selectRaw('COUNT(*) as total_sessions, COALESCE(AVG(duration), 0) as avg_duration')
+                ->first();
+
+            $total = (int) ($totals->total_sessions ?? 0);
+            $bounced = $total > 0 ? (clone $query)->where('page_views', '<=', 1)->count() : 0;
+
+            return [
+                'total_sessions' => $total,
+                'avg_duration' => (int) round((float) ($totals->avg_duration ?? 0)),
+                'bounce_rate' => $total > 0 ? round(($bounced / $total) * 100, 1) : 0,
+            ];
         });
     }
 

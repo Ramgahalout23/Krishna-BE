@@ -140,10 +140,16 @@ class CustomDesignController extends Controller
             CustomDesign::STATUS_REJECTED,
         ];
 
+        // One grouped query instead of a COUNT(*) per status.
+        $grouped = CustomDesign::selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->toArray();
+
         $counts = [];
         $total = 0;
         foreach ($statuses as $status) {
-            $count = CustomDesign::where('status', $status)->count();
+            $count = (int) ($grouped[$status] ?? 0);
             $counts[$status] = $count;
             $total += $count;
         }

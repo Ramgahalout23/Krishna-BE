@@ -7,6 +7,9 @@ use App\Exceptions\AppError;
 use App\Models\Seo;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Page;
+use App\Models\SeoScoreHistory;
+use App\Models\Sitemap;
 use App\Traits\CacheKeyRegistry;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -45,6 +48,102 @@ class SeoService
         if (isset($data['meta_keywords'])) $mapped['meta_keywords'] = $data['meta_keywords'];
 
         return $this->seoRepository->update($seo->id, $mapped)->toArray();
+    }
+
+    // ── Dashboard aggregates ──
+
+    /**
+     * Aggregate statistics for the admin SEO dashboard.
+     *
+     * Cached (and key-tracked via CacheKeyRegistry, so every SEO mutation —
+     * global SEO, entity SEO, audits, sitemap regeneration — clears it
+     * automatically) because the dashboard auto-refreshes every 60 seconds for
+     * every open admin tab and these are ~15 COUNT/AVG scans over the whole
+     * catalog. The Seo counts are collapsed into a single grouped query.
+     */
+    public function getDashboardStats(): array
+    {
+        return $this->cacheWithTracking('seo_dashboard_stats', 120, function () {
+            $seoByType = Seo::selectRaw(
+                'entity_type, COUNT(*) as total, COUNT(seo_score) as scored, AVG(seo_score) as avg_score, '
+                . 'SUM(CASE WHEN seo_score >= 80 THEN 1 ELSE 0 END) as excellent, '
+                . 'SUM(CASE WHEN seo_score BETWEEN 60 AND 79 THEN 1 ELSE 0 END) as good, '
+                . 'SUM(CASE WHEN seo_score BETWEEN 40 AND 59 THEN 1 ELSE 0 END) as needs_work, '
+                . 'SUM(CASE WHEN seo_score IS NOT NULL AND seo_score < 40 THEN 1 ELSE 0 END) as poor'
+            )->groupBy('entity_type')->get();
+
+            $seoCount = (int) $seoByType->sum('total');
+            $seoWithScores = (int) $seoByType->sum('scored');
+            $countFor = fn(string $type) => (int) ($seoByType->firstWhere('entity_type', $type)->total ?? 0);
+
+            // Weighted average across per-entity averages == true overall average.
+            $avgScore = $seoWithScores > 0
+                ? $seoByType->sum(fn($row) => (float) $row->avg_score * (int) $row->scored) / $seoWithScores
+                : 0;
+
+            $totalProducts = Product::count();
+            $totalCategories = Category::count();
+            $totalPages = class_exists(Page::class) ? Page::count() : 0;
+
+            $trend = SeoScoreHistory::selectRaw('DATE(created_at) as date, AVG(score) as avg_score, COUNT(*) as snapshots')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get()
+                ->map(fn($r) => [
+                    'date' => $r->date,
+                    'avg_score' => round((float) $r->avg_score, 1),
+                    'snapshots' => (int) $r->snapshots,
+                ])
+                ->values()
+                ->all();
+
+            $weekAgoAvg = SeoScoreHistory::where('created_at', '>=', now()->subDays(7))
+                ->where('created_at', '<', now())->avg('score');
+            $prevWeekAvg = SeoScoreHistory::where('created_at', '>=', now()->subDays(14))
+                ->where('created_at', '<', now()->subDays(7))->avg('score');
+
+            $trendDirection = null;
+            $trendChange = 0;
+            if ($weekAgoAvg && $prevWeekAvg) {
+                $trendChange = round($weekAgoAvg - $prevWeekAvg, 1);
+                $trendDirection = $trendChange > 2 ? 'up' : ($trendChange < -2 ? 'down' : 'stable');
+            }
+
+            return [
+                'counts' => [
+                    'total_products' => $totalProducts,
+                    'total_categories' => $totalCategories,
+                    'total_pages' => $totalPages,
+                    'total_entities' => $totalProducts + $totalCategories + $totalPages,
+                    'seo_records_count' => $seoCount,
+                    'seo_with_scores' => $seoWithScores,
+                    'products_with_seo' => $countFor('product'),
+                    'categories_with_seo' => $countFor('category'),
+                    'pages_with_seo' => $countFor('page'),
+                ],
+                'average_score' => round($avgScore, 1),
+                'distribution' => [
+                    'excellent' => (int) $seoByType->sum('excellent'),
+                    'good' => (int) $seoByType->sum('good'),
+                    'needs_work' => (int) $seoByType->sum('needs_work'),
+                    'poor' => (int) $seoByType->sum('poor'),
+                ],
+                'recent_updates' => Seo::orderBy('updated_at', 'desc')
+                    ->take(10)
+                    ->get(['id', 'entity_type', 'entity_id', 'meta_title', 'seo_score', 'updated_at'])
+                    ->toArray(),
+                'sitemap' => [
+                    'entries_count' => Sitemap::count(),
+                    'last_generated' => Sitemap::max('created_at'),
+                ],
+                'score_trend' => [
+                    'daily' => $trend,
+                    'week_over_week_change' => $trendChange,
+                    'direction' => $trendDirection,
+                ],
+            ];
+        });
     }
 
     // ── Entity SEO ──

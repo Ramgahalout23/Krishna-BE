@@ -39,18 +39,94 @@ class ProductVariantController extends Controller
 
     // ── Admin Routes ──
 
+    /**
+     * Validation rules covering everything the admin variant form submits.
+     * `stock`, `color` and `size` are frontend-side aliases for the real
+     * `quantity` / `attributes` columns and are mapped in mapVariantPayload().
+     */
+    private const VARIANT_RULES = [
+        'name' => 'required|string|max:255',
+        'sku' => 'required|string|max:255',
+        'price' => 'nullable|numeric|min:0',
+        'quantity' => 'nullable|integer|min:0',
+        'stock' => 'nullable|integer|min:0',
+        'color' => 'nullable|string|max:255',
+        'size' => 'nullable|string|max:255',
+        'attributes' => 'nullable|array',
+        'images' => 'nullable|array',
+        'images.*' => 'nullable',
+    ];
+
+    /**
+     * Map the admin form payload onto the product_variants columns.
+     * Without this, color/size/stock/variant images were dropped by validation
+     * and the variants table always rendered empty swatches and no photos.
+     */
+    private function mapVariantPayload(array $validated): array
+    {
+        $data = $validated;
+
+        // Rebuild `attributes` only when the caller actually supplied colour,
+        // size or an attributes object — otherwise a partial update (e.g. a
+        // stock tweak) would blank out the existing swatches.
+        $touchedAttributes = array_key_exists('attributes', $validated)
+            || !empty($validated['color'])
+            || !empty($validated['size']);
+
+        if (array_key_exists('stock', $data)) {
+            $data['quantity'] = $data['stock'];
+        }
+        unset($data['stock']);
+
+        if ($touchedAttributes) {
+            $attributes = is_array($validated['attributes'] ?? null) ? $validated['attributes'] : [];
+            if (!empty($validated['color'])) {
+                $attributes['color'] = $validated['color'];
+            }
+            if (!empty($validated['size'])) {
+                $attributes['size'] = $validated['size'];
+            }
+            $data['attributes'] = $attributes;
+        } else {
+            unset($data['attributes']);
+        }
+
+        unset($data['color'], $data['size']);
+
+        if (array_key_exists('images', $data)) {
+            $data['images'] = is_array($data['images']) ? array_values($data['images']) : [];
+        }
+
+        // Only forward columns that actually exist on the variants table.
+        return array_intersect_key($data, array_flip(['name', 'sku', 'price', 'quantity', 'attributes', 'images']));
+    }
+
     public function store(Request $request, string $productId): JsonResponse
     {
         try {
-            $validated = $request->validate(['name' => 'required|string', 'sku' => 'required|string', 'price' => 'nullable|numeric', 'quantity' => 'nullable|integer']);
-            return response()->json(['success' => true, 'message' => 'Variant created', 'data' => $this->variantService->create($productId, $validated)], 201);
+            $input = $request->all();
+            if (empty($input['name'])) {
+                $parts = array_filter([$input['color'] ?? null, $input['size'] ?? null]);
+                if (!empty($parts)) {
+                    $input['name'] = implode(' / ', $parts);
+                    $request->replace($input);
+                }
+            }
+
+            $validated = $request->validate(self::VARIANT_RULES);
+            return response()->json(['success' => true, 'message' => 'Variant created', 'data' => $this->variantService->create($productId, $this->mapVariantPayload($validated))], 201);
         } catch (AppError $e) { return $e->render(); }
     }
 
     public function update(Request $request, string $id): JsonResponse
     {
         try {
-            return response()->json(['success' => true, 'data' => $this->variantService->update($id, $request->all())]);
+            $rules = array_merge(self::VARIANT_RULES, [
+                'name' => 'sometimes|string|max:255',
+                'sku' => 'sometimes|string|max:255',
+            ]);
+            $validated = $request->validate($rules);
+            return response()->json(['success' => true, 'data' => $this->variantService->update($id, $this->mapVariantPayload($validated))]);
         } catch (AppError $e) { return $e->render(); }
     }
 

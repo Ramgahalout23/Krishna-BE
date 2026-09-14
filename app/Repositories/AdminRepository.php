@@ -384,23 +384,48 @@ class AdminRepository
 
             $stats = DB::select("
                 SELECT
-                    (SELECT COUNT(*) FROM {$pageViewsTable}) AS totalVisitors,
-                    (SELECT COUNT(DISTINCT user_id) FROM {$cartItemsTable}) AS totalCarts,
+                    (SELECT COUNT(*) FROM {$pageViewsTable}) AS totalPageViews,
+                    (SELECT COUNT(DISTINCT session_id) FROM {$pageViewsTable} WHERE session_id IS NOT NULL) AS uniqueVisitors,
+                    (SELECT COUNT(DISTINCT session_id) FROM {$cartItemsTable} WHERE session_id IS NOT NULL) AS cartSessions,
+                    (SELECT COUNT(DISTINCT user_id) FROM {$cartItemsTable} WHERE user_id IS NOT NULL) AS cartUsers,
                     (SELECT COUNT(*) FROM orders) AS totalOrders,
                     (SELECT COUNT(*) FROM orders WHERE status IN ('DELIVERED', 'CONFIRMED')) AS completedOrders,
                     (SELECT COUNT(*) FROM {$cartTable}) AS abandonedCarts
             ");
 
             $result = (array) $stats[0];
-            $totalVisitors = (int) ($result['totalVisitors'] ?? 0);
-            $totalCarts = (int) ($result['totalCarts'] ?? 0);
+            $totalPageViews = (int) ($result['totalPageViews'] ?? 0);
+            $uniqueVisitors = (int) ($result['uniqueVisitors'] ?? 0);
             $totalOrders = (int) ($result['totalOrders'] ?? 0);
             $completedOrders = (int) ($result['completedOrders'] ?? 0);
             $abandonedCarts = (int) ($result['abandonedCarts'] ?? 0);
 
-            $cartToOrder = $totalCarts > 0 ? round(($totalOrders / $totalCarts) * 100, 2) : 0;
-            $orderCompletion = $totalOrders > 0 ? round(($completedOrders / $totalOrders) * 100, 2) : 0;
-            $conversionRate = $totalCarts > 0 ? round(($completedOrders / $totalCarts) * 100, 2) : 0;
+            // A visitor = one distinct tracking session. Counting every page_view
+            // row instead overstated `totalVisitors` by ~2x, and dividing orders
+            // by the *live* cart count (which is cleared at checkout) produced the
+            // nonsensical 100%+ rates seen on the dashboard.
+            $totalVisitors = $uniqueVisitors > 0 ? $uniqueVisitors : $totalPageViews;
+
+            // `cart_items` only holds *live* cart state — rows are cleared after
+            // checkout — while `orders` is historical. Any ratio between them can
+            // therefore exceed 100% (a single live cart vs many past orders), so
+            // the funnel rates are clamped to a displayable 0-100 range.
+            // Counting distinct sessions (guests included) is the most accurate
+            // denominator available; guests previously made this count collapse
+            // to just the handful of customers with a non-null user_id.
+            $cartSessions = (int) ($result['cartSessions'] ?? 0);
+            $cartUsers = (int) ($result['cartUsers'] ?? 0);
+            $totalCarts = $cartSessions > 0 ? $cartSessions : $cartUsers;
+
+            $rate = fn(int $numerator, int $denominator) => $denominator > 0
+                ? min(100, round(($numerator / $denominator) * 100, 2))
+                : 0;
+
+            $cartToOrder = $rate($totalOrders, $totalCarts);
+            $orderCompletion = $rate($completedOrders, $totalOrders);
+            // Visitor -> order, the standard e-commerce conversion rate. Using the
+            // completed/totalCarts ratio here made a single live cart read as 100%.
+            $conversionRate = $rate($totalOrders, $totalVisitors);
 
             return [
                 'totalVisitors'   => $totalVisitors,
@@ -762,8 +787,16 @@ class AdminRepository
             $filters['per_page'] = $filters['limit'];
         }
 
-        $query = Product::with(['category' => fn($q) => $q->select(['id', 'name']), 'inventory' => fn($q) => $q->select(['id', 'product_id', 'available_quantity'])])
-            ->select(['id', 'name', 'slug', 'sku', 'price', 'old_price', 'cost', 'status', 'quantity', 'category_id', 'description', 'short_description', 'rating', 'review_count', 'badge', 'created_at']);
+        // `images` must be included: the admin table renders the first gallery
+        // image as the row thumbnail, and the edit modal pre-fills its gallery
+        // from this same payload. Without it every edit form opened with an
+        // empty gallery and saving would have wiped the product's photos.
+        $query = Product::with([
+                'category' => fn($q) => $q->select(['id', 'name']),
+                'inventory' => fn($q) => $q->select(['id', 'product_id', 'available_quantity']),
+                'images' => fn($q) => $q->select(['id', 'product_id', 'url', 'alt', 'display_order'])->orderBy('display_order'),
+            ])
+            ->select(['id', 'name', 'slug', 'sku', 'price', 'old_price', 'cost', 'status', 'quantity', 'category_id', 'brand_id', 'description', 'short_description', 'rating', 'review_count', 'badge', 'is_featured', 'hover_image_url', 'video_url', 'created_at']);
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -791,6 +824,13 @@ class AdminRepository
             $product->shortDescription = $product->short_description;
             $product->categoryName = $product->category?->name;
             $product->stock = $product->quantity;
+            $product->categoryId = $product->category_id;
+            $product->brandId = $product->brand_id;
+            $product->hoverImageUrl = $product->hover_image_url;
+            $product->videoUrl = $product->video_url;
+            $product->isFeatured = (bool) $product->is_featured;
+            // Convenience primary image so simple consumers don't have to walk the relation
+            $product->image = $product->images->first()?->url ?? ($product->images[0]->url ?? null);
             return $product;
         });
 

@@ -264,13 +264,22 @@ class RefundService
     /**
      * Admin: list all refund requests.
      */
+    /**
+     * Resolve the requested page size, accepting both `per_page` and `limit`
+     * (the admin UI sends `limit`).
+     */
+    private function perPage(array $filters): int
+    {
+        return max(1, (int) ($filters['per_page'] ?? $filters['limit'] ?? 20));
+    }
+
     public function getAllRefundRequests(array $filters = []): array
     {
         $query = RefundRequest::with(['user', 'order']);
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-        return $query->latest()->paginate($filters['per_page'] ?? 20)->toArray();
+        return $query->latest()->paginate($this->perPage($filters))->toArray();
     }
 
     /**
@@ -282,7 +291,18 @@ class RefundService
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-        return $query->latest()->paginate($filters['per_page'] ?? 20)->toArray();
+
+        // Store-wide per-status totals, independent of the current page/filter.
+        // The admin cards previously counted only the visible page.
+        $counts = ReturnRequest::selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->toArray();
+
+        $paginator = $query->latest()->paginate($this->perPage($filters))->toArray();
+        $paginator['counts'] = $counts;
+
+        return $paginator;
     }
 
     /**
@@ -294,7 +314,7 @@ class RefundService
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-        return $query->latest()->paginate($filters['per_page'] ?? 20)->toArray();
+        return $query->latest()->paginate($this->perPage($filters))->toArray();
     }
 
     /**

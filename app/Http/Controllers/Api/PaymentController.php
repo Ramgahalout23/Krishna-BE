@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\Refund;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -214,7 +215,24 @@ class PaymentController extends Controller
 
     public function getAllPayments(Request $request): JsonResponse
     {
-        $paginator = Payment::with('order')->latest()->paginate($request->input('per_page', 20));
+        // Accept both `per_page` and `limit` — the admin UI sends `limit`.
+        $perPage = (int) ($request->input('per_page') ?? $request->input('limit') ?? 20);
+        $query = Payment::with('order');
+
+        if ($request->filled('status') && strtoupper($request->status) !== 'ALL') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhere('order_id', 'like', "%{$search}%")
+                  ->orWhere('transaction_id', 'like', "%{$search}%");
+            });
+        }
+
+        $paginator = $query->latest()->paginate(max(1, $perPage));
 
         // Map each payment to include camelCase fields expected by frontend
         $paginator->getCollection()->transform(function ($payment) {
@@ -231,12 +249,24 @@ class PaymentController extends Controller
 
     public function getPaymentStats(Request $request): JsonResponse
     {
-        $totalCount    = Payment::count();
-        $completedCnt  = Payment::where('status', 'COMPLETED')->count();
-        $pendingCnt    = Payment::where('status', 'PENDING')->count();
-        $failedCnt     = Payment::where('status', 'FAILED')->count();
-        $totalAmount   = (float) Payment::where('status', 'COMPLETED')->sum('amount');
-        $pendingAmount = (float) Payment::where('status', 'PENDING')->sum('amount');
+        // One pass over `payments` instead of six separate aggregate queries.
+        $row = DB::selectOne("
+            SELECT
+                COUNT(*) AS total_count,
+                SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) AS completed_count,
+                SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) AS pending_count,
+                SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) AS failed_count,
+                COALESCE(SUM(CASE WHEN status = 'COMPLETED' THEN amount ELSE 0 END), 0) AS total_amount,
+                COALESCE(SUM(CASE WHEN status = 'PENDING' THEN amount ELSE 0 END), 0) AS pending_amount
+            FROM payments
+        ");
+
+        $totalCount    = (int) ($row->total_count ?? 0);
+        $completedCnt  = (int) ($row->completed_count ?? 0);
+        $pendingCnt    = (int) ($row->pending_count ?? 0);
+        $failedCnt     = (int) ($row->failed_count ?? 0);
+        $totalAmount   = (float) ($row->total_amount ?? 0);
+        $pendingAmount = (float) ($row->pending_amount ?? 0);
         // Refunds are tracked via the Refund model (separate table), not Payment status
         $refundedTotal = (float) \App\Models\Refund::where('status', 'APPROVED')->sum('amount');
 

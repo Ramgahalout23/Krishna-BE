@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use App\Repositories\ProductRepository;
 use App\Exceptions\AppError;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProductService
@@ -203,8 +206,115 @@ class ProductService
         return $this->enrichWithVariantFields($product->toArray());
     }
 
+    /**
+     * Normalise a submitted gallery into a clean, ordered, de-duplicated URL list.
+     * Accepts plain URL strings and `{ url }` objects (both are produced by the
+     * admin upload widgets). Anything else is discarded rather than trusted.
+     */
+    private function normalizeImageUrls(array $images): array
+    {
+        $urls = [];
+
+        foreach ($images as $image) {
+            if (is_array($image)) {
+                $image = $image['url'] ?? null;
+            }
+            if (!is_string($image)) {
+                continue;
+            }
+            $image = trim($image);
+            // `product_images.url` is a varchar(255) — drop over-long values
+            // instead of letting MySQL truncate/error in strict mode.
+            if ($image === '' || mb_strlen($image) > 255) {
+                continue;
+            }
+            $urls[] = $image;
+        }
+
+        return array_values(array_unique($urls));
+    }
+
+    /**
+     * Replace a product's gallery with the given URL list, preserving order.
+     *
+     * The gallery lives in the `product_images` table (not a column), so it can
+     * never be saved through mass assignment — it has to be synced explicitly.
+     * Without this, every image edit was silently discarded.
+     */
+    private function syncImages(Product $product, array $images): void
+    {
+        $urls = $this->normalizeImageUrls($images);
+
+        DB::transaction(function () use ($product, $urls) {
+            if (empty($urls)) {
+                $product->images()->delete();
+            } else {
+                $product->images()->whereNotIn('url', $urls)->delete();
+
+                foreach ($urls as $index => $url) {
+                    ProductImage::updateOrCreate(
+                        ['product_id' => $product->id, 'url' => $url],
+                        ['display_order' => $index]
+                    );
+                }
+            }
+        });
+    }
+
+    /**
+     * Build a collision-free SKU for products submitted without one.
+     */
+    private function generateUniqueSku(string $name): string
+    {
+        $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $name) ?: 'PRD', 0, 3));
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $sku = $prefix . '-' . strtoupper(Str::random(6));
+            if (!$this->productRepository->findBySku($sku)) {
+                return $sku;
+            }
+        }
+
+        return 'PRD-' . strtoupper(Str::random(10));
+    }
+
+    /**
+     * `products.sku`, `products.category_id` and `products.description` are all
+     * NOT NULL without a default in the schema. A payload that omits them would
+     * otherwise die inside MySQL with an opaque 500 ("Field 'x' doesn't have a
+     * default value"), so they are normalised here instead.
+     */
+    private function normalizeRequiredColumns(array $data, bool $isCreate): array
+    {
+        if (array_key_exists('description', $data) || $isCreate) {
+            $data['description'] = $data['description'] ?? '';
+        }
+
+        if ($isCreate) {
+            if (empty($data['sku'])) {
+                $data['sku'] = $this->generateUniqueSku($data['name'] ?? 'product');
+            }
+            if (empty($data['category_id'])) {
+                throw AppError::validation('Please choose a category for this product');
+            }
+
+            return $data;
+        }
+
+        // A partial update must never null out a required column.
+        foreach (['sku', 'category_id'] as $required) {
+            if (array_key_exists($required, $data) && empty($data[$required])) {
+                unset($data[$required]);
+            }
+        }
+
+        return $data;
+    }
+
     public function create(array $data): array
     {
+        $data = $this->normalizeRequiredColumns($data, true);
+
         if (!empty($data['sku'])) {
             $existing = $this->productRepository->findBySku($data['sku']);
             if ($existing) throw AppError::conflict("Product with SKU {$data['sku']} already exists");
@@ -212,10 +322,19 @@ class ProductService
 
         if (($data['price'] ?? 0) <= 0) throw AppError::validation('Price must be greater than 0');
 
+        // `images` is a relation, not a column — keep it out of mass assignment
+        // (Eloquent would try to set it as a relation and persist nothing).
+        $images = $data['images'] ?? [];
+        unset($data['images']);
+
         $data['slug'] = Str::slug($data['name']) . '-' . Str::random(6);
         $data['status'] = $data['status'] ?? 'DRAFT';
 
         $product = $this->productRepository->create($data);
+
+        if (!empty($images)) {
+            $this->syncImages($product, is_array($images) ? $images : []);
+        }
 
         // Clear cached lists so new product appears immediately
         $this->clearListCache();
@@ -243,7 +362,7 @@ class ProductService
             \Illuminate\Support\Facades\Log::warning('AutoSEO failed for product', ['id' => $product->id, 'error' => $e->getMessage()]);
         }
 
-        return $product->toArray();
+        return $this->productWithImages($product);
     }
 
     public function update(string $id, array $data): array
@@ -255,9 +374,35 @@ class ProductService
             if ($existing) throw AppError::conflict("SKU {$data['sku']} already in use");
         }
 
-        $product = $this->productRepository->update($id, $data);
+        $data = $this->normalizeRequiredColumns($data, false);
+
+        // Only touch the gallery when the caller actually sent an `images` key,
+        // so a partial update (e.g. a status toggle) can never wipe it.
+        $hasImages = array_key_exists('images', $data);
+        $images = $hasImages ? $data['images'] : [];
+        unset($data['images']);
+
+        if (!empty($data)) {
+            $product = $this->productRepository->update($id, $data);
+        }
+
+        if ($hasImages) {
+            $this->syncImages($product, is_array($images) ? $images : []);
+        }
+
         $this->clearListCache();
         Cache::forget('homepage_all');
+
+        return $this->productWithImages($product);
+    }
+
+    /**
+     * Serialise a product with its gallery attached and ordered.
+     */
+    private function productWithImages(Product $product): array
+    {
+        $product->load(['images' => fn($q) => $q->select(['id', 'product_id', 'url', 'alt', 'display_order'])->orderBy('display_order')]);
+        $product->image = $product->images->first()?->url ?? ($product->images[0]->url ?? null);
         return $product->toArray();
     }
 

@@ -160,22 +160,37 @@ class TrackingController extends Controller
         return $this->adminPageViews();
     }
 
+    /**
+     * Active session count + the session rows themselves.
+     * `active_sessions` stays an integer for backwards compatibility with the
+     * dashboard widget; `sessions` is the list the admin table renders.
+     */
     public function activeSessions(): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => $this->trackingService->getActiveSessions()]);
+        $count = $this->trackingService->getActiveSessions()['active_sessions'] ?? 0;
+
+        return response()->json(['success' => true, 'data' => [
+            'active_sessions' => $count,
+            'sessions' => $this->trackingService->getActiveSessionList(),
+        ]]);
     }
 
-    public function sessionStats(): JsonResponse
+    public function sessionStats(Request $request): JsonResponse
     {
-        return $this->activeSessions();
+        return response()->json(['success' => true, 'data' => $this->trackingService->getSessionStats(
+            $request->query('dateRange', 'all'),
+            $request->query('startDate'),
+            $request->query('endDate')
+        )]);
     }
 
     public function dashboard(): JsonResponse
     {
         return response()->json(['success' => true, 'data' => [
             'page_views' => $this->trackingService->getPageViewStats(),
-            'active_sessions' => $this->trackingService->getActiveSessions(),
+            'active_sessions' => $this->trackingService->getActiveSessions()['active_sessions'] ?? 0,
             'top_pages' => $this->trackingService->getTopPages(),
+            'session_stats' => $this->trackingService->getSessionStats(),
         ]]);
     }
 

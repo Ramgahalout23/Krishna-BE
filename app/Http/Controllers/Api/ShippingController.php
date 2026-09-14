@@ -188,7 +188,8 @@ class ShippingController extends Controller
         $page = $request->page ?? 1;
         $limit = $request->limit ?? 20;
         $search = $request->search;
-        return response()->json(['success' => true, 'data' => $this->shippingService->getAllShippings((int)$page, (int)$limit, $search)]);
+        $status = $request->status;
+        return response()->json(['success' => true, 'data' => $this->shippingService->getAllShippings((int)$page, (int)$limit, $search, $status)]);
     }
 
     public function getShipmentsByStatus(Request $request): JsonResponse

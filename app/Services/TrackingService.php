@@ -134,6 +134,16 @@ class TrackingService
         return ['active_sessions' => $this->trackingRepository->getActiveSessions()];
     }
 
+    public function getActiveSessionList(int $limit = 25): array
+    {
+        return $this->trackingRepository->getActiveSessionList($limit);
+    }
+
+    public function getSessionStats(?string $dateRange = null, ?string $startDate = null, ?string $endDate = null): array
+    {
+        return $this->trackingRepository->getSessionStats($dateRange, $startDate, $endDate);
+    }
+
     public function getTopPages(int $limit = 10): array
     {
         return $this->trackingRepository->getTopPages($limit)->toArray();

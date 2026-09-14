@@ -108,26 +108,59 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'data' => ['available' => $available]]);
     }
 
+    /**
+     * Shared validation rules for the admin product create/update payload.
+     *
+     * Everything the admin form submits has to be listed here, otherwise
+     * Laravel's `validate()` drops the key before it reaches the service — which
+     * is how product images, category, stock, badge and hover images used to
+     * silently fail to save.
+     */
+    private const PRODUCT_RULES = [
+        'description' => 'nullable|string',
+        'short_description' => 'nullable|string',
+        'old_price' => 'nullable|numeric|min:0',
+        'cost' => 'nullable|numeric|min:0',
+        'category_id' => 'nullable|exists:categories,id',
+        'brand_id' => 'nullable|exists:brands,id',
+        'quantity' => 'nullable|integer|min:0',
+        'status' => 'nullable|string|in:DRAFT,PUBLISHED,ARCHIVED',
+        'badge' => 'nullable|string|max:255',
+        'hover_image_url' => 'nullable|string|max:2048',
+        'video_url' => 'nullable|string|max:2048',
+        'is_featured' => 'nullable|boolean',
+        'is_new' => 'nullable|boolean',
+        'is_sale' => 'nullable|boolean',
+        'tags' => 'nullable|array',
+        // Gallery: list of URLs (strings) or { url } objects. Both shapes are
+        // normalised and persisted to `product_images` by ProductService.
+        'images' => 'nullable|array',
+        'images.*' => 'nullable',
+    ];
+
+    private const CAMEL_CASE_MAPPINGS = [
+        'categoryId' => 'category_id',
+        'hoverImageUrl' => 'hover_image_url',
+        'videoUrl' => 'video_url',
+        'oldPrice' => 'old_price',
+        'shortDescription' => 'short_description',
+        'brandId' => 'brand_id',
+        'isFeatured' => 'is_featured',
+        'isNew' => 'is_new',
+        'isSale' => 'is_sale',
+    ];
+
     public function store(Request $request): JsonResponse
     {
         try {
-            $input = $this->mapCamelCase($request->all(), [
-                'categoryId' => 'category_id',
-                'hoverImageUrl' => 'hover_image_url',
-                'videoUrl' => 'video_url',
-            ]);
+            $input = $this->mapCamelCase($request->all(), self::CAMEL_CASE_MAPPINGS);
             $request->replace($input);
 
-            $validated = $request->validate([
+            $validated = $request->validate(array_merge(self::PRODUCT_RULES, [
                 'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
                 'price' => 'required|numeric|min:0',
                 'sku' => 'nullable|string|unique:products',
-                'category_id' => 'nullable|exists:categories,id',
-                'quantity' => 'nullable|integer|min:0',
-                'status' => 'nullable|string|in:DRAFT,PUBLISHED,ARCHIVED',
-                'video_url' => 'nullable|string|max:2048',
-            ]);
+            ]));
 
             $product = $this->productService->create($validated);
 
@@ -140,21 +173,14 @@ class ProductController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         try {
-            $input = $this->mapCamelCase($request->all(), [
-                'categoryId' => 'category_id',
-                'hoverImageUrl' => 'hover_image_url',
-                'videoUrl' => 'video_url',
-            ]);
+            $input = $this->mapCamelCase($request->all(), self::CAMEL_CASE_MAPPINGS);
             $request->replace($input);
 
-            $validated = $request->validate([
+            $validated = $request->validate(array_merge(self::PRODUCT_RULES, [
                 'name' => 'sometimes|string|max:255',
-                'description' => 'nullable|string',
                 'price' => 'sometimes|numeric|min:0',
                 'sku' => 'nullable|string|unique:products,sku,'.$id,
-                'status' => 'nullable|string|in:DRAFT,PUBLISHED,ARCHIVED',
-                'video_url' => 'nullable|string|max:2048',
-            ]);
+            ]));
 
             $product = $this->productService->update($id, $validated);
 

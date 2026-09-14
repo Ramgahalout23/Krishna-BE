@@ -306,114 +306,63 @@ class SeoController extends Controller
     public function dashboard(): JsonResponse
     {
         try {
-            // ── Entity counts ──
-            $totalProducts = \App\Models\Product::count();
-            $totalCategories = \App\Models\Category::count();
-            $totalPages = class_exists(\App\Models\Page::class) ? \App\Models\Page::count() : 0;
-            $totalEntities = $totalProducts + $totalCategories + $totalPages;
+            // All of the COUNT/AVG aggregation happens inside one cached service
+            // call (see SeoService::getDashboardStats) — this endpoint is polled
+            // every 60s by the auto-refreshing dashboard.
+            $stats = $this->seoService->getDashboardStats();
+            $counts = $stats['counts'];
 
-            // ── SEO records count ──
-            $seoCount = \App\Models\Seo::count();
-            $seoWithScores = \App\Models\Seo::whereNotNull('seo_score')->count();
-
-            // ── Entities WITH vs WITHOUT SEO ──
-            $productSeoCount = \App\Models\Seo::where('entity_type', 'product')->count();
-            $categorySeoCount = \App\Models\Seo::where('entity_type', 'category')->count();
-            $pageSeoCount = \App\Models\Seo::where('entity_type', 'page')->count();
-
-            // ── Average SEO score ──
-            $avgScore = \App\Models\Seo::whereNotNull('seo_score')->avg('seo_score');
-
-            // ── Score distribution ──
-            $excellent = \App\Models\Seo::whereNotNull('seo_score')->where('seo_score', '>=', 80)->count();
-            $good = \App\Models\Seo::whereNotNull('seo_score')->whereBetween('seo_score', [60, 79])->count();
-            $needsWork = \App\Models\Seo::whereNotNull('seo_score')->whereBetween('seo_score', [40, 59])->count();
-            $poor = \App\Models\Seo::whereNotNull('seo_score')->where('seo_score', '<', 40)->count();
-
-            // ── Recent SEO updates ──
-            $recentUpdates = \App\Models\Seo::orderBy('updated_at', 'desc')
-                ->take(10)
-                ->get(['id', 'entity_type', 'entity_id', 'meta_title', 'seo_score', 'updated_at'])
-                ->toArray();
-
-            // ── Global SEO status ──
+            // ── Global SEO status ── (already cached individually)
             $globalSeo = $this->seoService->getGlobalSEO();
 
             // ── Robots.txt status ──
             $robots = $this->seoService->getRobotsTxt();
 
-            // ── Sitemap stats ──
-            $sitemapEntries = \App\Models\Sitemap::count();
-            $lastSitemapGen = \App\Models\Sitemap::max('created_at');
-
             // ── Advanced settings status ──
             $advSettings = $this->advancedSeoService->getAdvancedSettings();
 
-            // ── Score trend (daily avg over last 30 days) ──
-            $trendDays = 30;
-            $trendRaw = \App\Models\SeoScoreHistory::selectRaw("DATE(created_at) as date, AVG(score) as avg_score, COUNT(*) as snapshots")
-                ->where('created_at', '>=', now()->subDays($trendDays))
-                ->groupBy('date')
-                ->orderBy('date', 'asc')
-                ->get();
-            $scoreTrend = $trendRaw->map(fn($r) => [
-                'date' => $r->date,
-                'avg_score' => round((float) $r->avg_score, 1),
-                'snapshots' => (int) $r->snapshots,
-            ])->values();
-
-            // Compute week-over-week change
-            $weekAgoAvg = \App\Models\SeoScoreHistory::where('created_at', '>=', now()->subDays(7))
-                ->where('created_at', '<', now())->avg('score');
-            $prevWeekAvg = \App\Models\SeoScoreHistory::where('created_at', '>=', now()->subDays(14))
-                ->where('created_at', '<', now()->subDays(7))->avg('score');
-            $trendDirection = null;
-            $trendChange = 0;
-            if ($weekAgoAvg && $prevWeekAvg) {
-                $trendChange = round($weekAgoAvg - $prevWeekAvg, 1);
-                $trendDirection = $trendChange > 2 ? 'up' : ($trendChange < -2 ? 'down' : 'stable');
-            }
+            $coveragePct = fn(int $withSeo, int $total) => $total > 0 ? round(($withSeo / $total) * 100, 1) : 0;
 
             return response()->json(['success' => true, 'data' => [
                 'overview' => [
-                    'total_entities' => $totalEntities,
-                    'total_products' => $totalProducts,
-                    'total_categories' => $totalCategories,
-                    'total_pages' => $totalPages,
-                    'seo_records_count' => $seoCount,
-                    'seo_coverage_pct' => $totalEntities > 0 ? round(($seoCount / $totalEntities) * 100, 1) : 0,
+                    'total_entities' => $counts['total_entities'],
+                    'total_products' => $counts['total_products'],
+                    'total_categories' => $counts['total_categories'],
+                    'total_pages' => $counts['total_pages'],
+                    'seo_records_count' => $counts['seo_records_count'],
+                    'seo_coverage_pct' => $coveragePct($counts['seo_records_count'], $counts['total_entities']),
                 ],
                 'seo_coverage' => [
-                    'products' => ['total' => $totalProducts, 'with_seo' => $productSeoCount, 'coverage_pct' => $totalProducts > 0 ? round(($productSeoCount / $totalProducts) * 100, 1) : 0],
-                    'categories' => ['total' => $totalCategories, 'with_seo' => $categorySeoCount, 'coverage_pct' => $totalCategories > 0 ? round(($categorySeoCount / $totalCategories) * 100, 1) : 0],
-                    'pages' => ['total' => $totalPages, 'with_seo' => $pageSeoCount, 'coverage_pct' => $totalPages > 0 ? round(($pageSeoCount / $totalPages) * 100, 1) : 0],
-                ],
-                'scores' => [
-                    'average_score' => round($avgScore ?? 0, 1),
-                    'scored_entities' => $seoWithScores,
-                    'distribution' => [
-                        'excellent' => $excellent,
-                        'good' => $good,
-                        'needs_work' => $needsWork,
-                        'poor' => $poor,
+                    'products' => [
+                        'total' => $counts['total_products'],
+                        'with_seo' => $counts['products_with_seo'],
+                        'coverage_pct' => $coveragePct($counts['products_with_seo'], $counts['total_products']),
+                    ],
+                    'categories' => [
+                        'total' => $counts['total_categories'],
+                        'with_seo' => $counts['categories_with_seo'],
+                        'coverage_pct' => $coveragePct($counts['categories_with_seo'], $counts['total_categories']),
+                    ],
+                    'pages' => [
+                        'total' => $counts['total_pages'],
+                        'with_seo' => $counts['pages_with_seo'],
+                        'coverage_pct' => $coveragePct($counts['pages_with_seo'], $counts['total_pages']),
                     ],
                 ],
-                'score_trend' => [
-                    'daily' => $scoreTrend,
-                    'week_over_week_change' => $trendChange,
-                    'direction' => $trendDirection,
+                'scores' => [
+                    'average_score' => $stats['average_score'],
+                    'scored_entities' => $counts['seo_with_scores'],
+                    'distribution' => $stats['distribution'],
                 ],
+                'score_trend' => $stats['score_trend'],
                 'global_seo' => $globalSeo,
                 'robots' => [
                     'has_custom_robots' => !empty($robots['content']) && $robots['content'] !== "User-agent: *\nAllow: /\n",
                     'last_updated' => $robots['updated_at'],
                 ],
-                'sitemap' => [
-                    'entries_count' => $sitemapEntries,
-                    'last_generated' => $lastSitemapGen,
-                ],
+                'sitemap' => $stats['sitemap'],
                 'advanced' => $advSettings,
-                'recent_updates' => $recentUpdates,
+                'recent_updates' => $stats['recent_updates'],
             ]]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to load SEO dashboard', 'error' => $e->getMessage()], 500);

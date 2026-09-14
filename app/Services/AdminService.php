@@ -57,6 +57,9 @@ class AdminService
         $customerGrowth = $this->adminRepository->getCustomerGrowth(12);
         $hourlyDist     = $this->adminRepository->getHourlyDistribution();
         $paymentTrends  = $this->adminRepository->getPaymentMethodTrends(30);
+        // Aggregate per-method totals. `paymentTrends` above is a per-day series
+        // (payment_method, date, count, total) and cannot drive the pie/legend.
+        $paymentMethods = $this->adminRepository->getPaymentMethodStats();
         $conversion     = $this->adminRepository->getConversionMetrics();
         $dailySales     = $this->adminRepository->getDailySales(14);
         $reviewAnalytics = $this->adminRepository->getReviewAnalytics(30);
@@ -65,7 +68,8 @@ class AdminService
         return compact(
             'metrics', 'health', 'logs', 'orders', 'orderStatus',
             'topProducts', 'revenueComp', 'customerGrowth', 'hourlyDist',
-            'paymentTrends', 'conversion', 'dailySales', 'reviewAnalytics', 'lowStock'
+            'paymentTrends', 'paymentMethods', 'conversion', 'dailySales',
+            'reviewAnalytics', 'lowStock'
         );
     }
 

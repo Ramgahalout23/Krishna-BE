@@ -118,28 +118,23 @@ class OrderRepository extends BaseRepository
             $query->where('status', $filters['status']);
         }
 
-        $perPage = $filters['per_page'] ?? 15;
-        return $query->latest()->paginate($perPage);
+        // Callers have historically sent either `limit` or `per_page`; honour both
+        // so a page-size selector actually changes the page size.
+        $perPage = (int) ($filters['per_page'] ?? $filters['limit'] ?? 15);
+        return $query->latest()->paginate(max(1, $perPage));
     }
 
     public function findMany(array $filters = []): LengthAwarePaginator
     {
+        // The admin list renders only id/customer/total/status/date, so it does
+        // not need order items, their products, images or variants. Eager loading
+        // them pulled ~2.5 KB of image URLs per row plus a `custom_designs`
+        // lookup per order (see mapItemsWithCustomDesigns). Items remain
+        // available from the single-order detail endpoint.
         $query = Order::select('id', 'order_number', 'user_id', 'total', 'status', 'created_at', 'updated_at')
             ->with([
                 'user' => function ($q) {
                     $q->select(['id', 'first_name', 'last_name', 'email']);
-                },
-                'items' => function ($q) {
-                    $q->select('id', 'order_id', 'product_id', 'variant_id', 'quantity', 'price', 'total', 'item_index', 'created_at');
-                },
-                'items.product' => function ($q) {
-                    $q->select('id', 'name');
-                },
-                'items.product.images' => function ($q) {
-                    $q->select('id', 'product_id', 'url');
-                },
-                'items.variant' => function ($q) {
-                    $q->select('id', 'name', 'attributes');
                 },
             ]);
 
@@ -167,8 +162,10 @@ class OrderRepository extends BaseRepository
             });
         }
 
-        $perPage = $filters['per_page'] ?? 15;
-        return $query->latest()->paginate($perPage);
+        // Callers have historically sent either `limit` or `per_page`; honour both
+        // so a page-size selector actually changes the page size.
+        $perPage = (int) ($filters['per_page'] ?? $filters['limit'] ?? 15);
+        return $query->latest()->paginate(max(1, $perPage));
     }
 
     public function createOrderItems(array $items): void

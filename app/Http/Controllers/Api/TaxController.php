@@ -14,8 +14,9 @@ class TaxController extends Controller
     use MapsCamelCaseFields;
     public function getTaxRates(Request $request): JsonResponse
     {
-        $perPage = $request->input('per_page', 20);
-        $rates = TaxRate::orderBy('priority')->orderBy('name')->paginate($perPage);
+        // Accept both `per_page` and `limit` (the admin UI uses `limit`).
+        $perPage = (int) ($request->input('per_page') ?? $request->input('limit') ?? 20);
+        $rates = TaxRate::orderBy('priority')->orderBy('name')->paginate(max(1, $perPage));
         return response()->json(['success' => true, 'data' => $rates]);
     }
 

@@ -166,14 +166,21 @@ class ShippingService
         return $shipping->load('order')->toArray();
     }
 
-    public function getAllShippings(int $page = 1, int $limit = 20, ?string $search = null): array
+    public function getAllShippings(int $page = 1, int $limit = 20, ?string $search = null, ?string $status = null): array
     {
-        $query = Shipping::with('order');
+        // No `with('order')` — the admin list only shows `order_id`, so the
+        // relation was an extra query plus an unused payload on every page.
+        $query = Shipping::query();
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('tracking_number', 'like', "%{$search}%")
                   ->orWhere('carrier', 'like', "%{$search}%");
             });
+        }
+        // The admin status dropdown previously had no effect because this filter
+        // was never applied here.
+        if ($status && strtoupper($status) !== 'ALL') {
+            $query->where('status', $status);
         }
         $paginator = $query->latest()->paginate($limit, ['*'], 'page', $page);
 

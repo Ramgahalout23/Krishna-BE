@@ -24,7 +24,20 @@ class User extends Authenticatable
         'last_login_at', 'vip_tier_id',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    /**
+     * Never serialise credentials, verification tokens or OTP codes.
+     * These columns were being sent to any admin API that returned a user
+     * (top customers, recent users, recent orders with their user relation).
+     * `$hidden` only affects array/JSON output, so internal verification logic
+     * that reads `$user->otp_code` keeps working.
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+        'password_reset_token', 'password_reset_expiry',
+        'email_verification_token', 'email_verification_expiry',
+        'phone_verification_token', 'phone_verification_expiry',
+        'otp_code', 'otp_expiry', 'otp_attempts',
+    ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
